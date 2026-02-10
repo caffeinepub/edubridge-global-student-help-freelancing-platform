@@ -1,0 +1,31 @@
+{
+  "kind": "build_request",
+  "title": "Premium SaaS UI upgrade request (already implemented by existing features)",
+  "priority": "normal",
+  "requirements": [],
+  "constraints": [
+    "Do not edit any files under frontend/src/components/ui (read-only UI component sources must be composed, not edited).",
+    "Keep all user-facing text in English.",
+    "Maintain the global constraint: no file upload inputs or backend endpoints.",
+    "Backend must remain single-actor (all Motoko logic in backend/main.mo); only add migration.mo if state upgrade is required."
+  ],
+  "nonGoals": [
+    "Add new product features beyond the requested UI/UX upgrades (e.g., new pages, new workflows, new backend models/APIs).",
+    "Introduce third-party auth providers (only Internet Identity is supported).",
+    "Add real-time communication via WebSockets (polling only)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

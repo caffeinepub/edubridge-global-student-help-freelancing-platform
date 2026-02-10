@@ -1,0 +1,63 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-10T11:09:28.704Z",
+  "summary": "BuildRequest specifies no explicit feature requirements (UI/UX upgrade only) but the diff adds/changes substantial application functionality, including new backend data models/APIs and multiple frontend modules for requests/chat/ratings/admin, which appear to go beyond a pure UI upgrade.",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "Added/expanded backend user profile system with roles and save/get profile APIs protected by authorization checks.",
+      "reason": "BuildRequest lists no new functional requirements and explicitly frames the work as an already-implemented UI upgrade; this is new/expanded backend functionality rather than UI composition.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Added/expanded backend help-request domain models and request creation/management logic (e.g., RequestStatus, RequestWithTextTasks, requests map, nextRequestId, createRequest).",
+      "reason": "BuildRequest contains no functional requirements and discourages new product features/models/APIs beyond UI/UX upgrades; this introduces/extends backend models and endpoints.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Introduced new chat functionality (hooks and UI panel) with polling, send/fetch/mark read/unread count behavior.",
+      "reason": "Not requested in BuildRequest (Requirements: none) and constitutes a new workflow/feature area beyond UI upgrades.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/hooks/useChat.ts, frontend/src/components/chat/ChatPanel.tsx)"
+      ]
+    },
+    {
+      "description": "Introduced ratings feature (rating dialog UI and ratings hooks).",
+      "reason": "Not requested (Requirements: none) and adds a new product feature/workflow beyond UI/UX changes.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/hooks/useRatings.ts, frontend/src/components/ratings/RatingDialog.tsx)"
+      ]
+    },
+    {
+      "description": "Introduced admin operations and analytics UI (admin hooks, analytics charts).",
+      "reason": "Not requested (Requirements: none) and adds new admin feature surface beyond a UI-only upgrade.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/hooks/useAdmin.ts, frontend/src/components/admin/AnalyticsCharts.tsx)"
+      ]
+    }
+  ],
+  "confidence": 0.72,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/animation/FloatingShapes.tsx",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/marketing/TypingHeroText.tsx",
+    "frontend/src/components/requests/RequestSuccessBanner.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/CreateAccountPage.tsx",
+    "frontend/src/pages/FreelancingHelpPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/LoginPage.tsx",
+    "frontend/src/pages/StudentRequestHelpPage.tsx",
+    "frontend/src/pages/dashboards/HelperDashboardPage.tsx",
+    "frontend/src/pages/dashboards/StudentDashboardPage.tsx",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

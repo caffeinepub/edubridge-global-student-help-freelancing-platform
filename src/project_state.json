@@ -1,0 +1,355 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Full-stack responsive web application \"EduBridge – Global Student Help & Freelancing Platform\" connecting students, helpers/freelancers, and businesses with role-based authentication, help request flows (online/offline), dashboards, chat, ratings, search/filtering, notifications, deployment-ready build, and an upgraded premium SaaS-level UI featuring glassmorphism, blue–purple–cyan gradients, modern typography, dark/light mode, and lightweight micro-animations across all pages.",
+  "architectural_notes": [
+    "Role-based access control with roles: Student, Helper/Freelancer, Business, Admin.",
+    "Requests support Online vs Offline; Offline requires additional location fields (location/city/address).",
+    "Core data entities: Users, Requests, Tasks, Ratings, Messages.",
+    "Visual design direction updated to premium SaaS UI using glassmorphism (blurred cards) and a blue–purple–cyan gradient palette, with lightweight micro-animations and strong accessibility contrast in both light/dark modes."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-the-core-information-architecture-and-routing-for-edubridge-with-the-following-pages-screens-landing-login-create-account-student-request-help-freelancing-service-help-student-dashboard-helper-dashboard-admin-dashboard-and-a-not-found-page",
+      "title": "Create the core information architecture and routing for EduBridge with the following pages/screens: Landing, Login, Create Account, Student Request Help, Freelancing & Service Help, Student Dashboard, Helper Dashboard, Admin Dashboard, and a Not Found page.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-cohesive-modern-professional-visual-theme-across-the-app-with-a-distinct-gradient-based-style-not-blue-purple-by-default-consistent-typography-spacing-and-components-include-smooth-micro-interactions-and-maintain-visual-parity-in-both-light-and-dark-modes",
+      "title": "Implement a cohesive modern professional visual theme across the app with a distinct gradient-based style (not blue/purple by default), consistent typography, spacing, and components; include smooth micro-interactions and maintain visual parity in both Light and Dark modes.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-landing-page-with-an-animated-hero-banner-featuring-typing-text-exactly-helping-students-completing-projects-supporting-businesses-primary-ctas-for-login-create-account-and-request-help-a-section-highlighting-students-help-freelancing-services-and-business-support-scroll-animations-and-hover-effects",
+      "title": "Build the Landing Page with: an animated hero banner featuring typing text exactly \"Helping Students • Completing Projects • Supporting Businesses\"; primary CTAs for Login, Create Account, and Request Help; a section highlighting Students Help, Freelancing Services, and Business Support; scroll animations and hover effects.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-email-password-authentication-with-role-selection-and-account-creation-including-the-specified-fields-and-validations-and-connect-it-to-backend-authentication-apis",
+      "title": "Implement email/password authentication with role selection and account creation, including the specified fields and validations, and connect it to backend authentication APIs.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-role-based-access-control-rbac-in-the-backend-and-frontend-route-guards-so-that-student-helper-freelancer-business-and-admin-capabilities-are-separated-and-protected",
+      "title": "Implement role-based access control (RBAC) in the backend and frontend route-guards so that Student, Helper/Freelancer, Business, and Admin capabilities are separated and protected.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-the-student-request-help-page-and-its-submission-flow-with-the-exact-form-fields-specified-including-manual-text-description-boxes-for-subject-and-topic-a-large-help-description-textarea-an-online-offline-selection-and-conditional-offline-address-fields-location-city-address-do-not-include-any-file-upload-anywhere",
+      "title": "Create the Student Request Help page and its submission flow with the exact form fields specified, including manual text description boxes for Subject and Topic, a large help description textarea, an Online/Offline selection, and conditional offline address fields (Location, City, Address). Do not include any file upload anywhere.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-the-freelancing-service-help-page-without-category-cards-instead-provide-a-help-request-section-where-users-enter-a-title-and-a-large-description-then-submit-the-help-request-to-the-backend",
+      "title": "Create the Freelancing & Service Help page without category cards; instead provide a Help Request section where users enter a title and a large description, then submit the help request to the backend.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-student-dashboard-to-display-the-current-student-s-submitted-requests-with-statuses-pending-accepted-completed-and-provide-entry-points-to-chat-with-the-assigned-helper-where-applicable",
+      "title": "Implement the Student Dashboard to display the current student's submitted requests with statuses (Pending / Accepted / Completed) and provide entry points to chat with the assigned helper where applicable.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-helper-dashboard-to-list-available-help-requests-allow-accepting-tasks-allow-marking-submitting-completed-work-and-include-a-rating-system-where-students-can-rate-helpers-after-completion",
+      "title": "Implement the Helper Dashboard to list available help requests, allow accepting tasks, allow marking/submitting completed work, and include a rating system where students can rate helpers after completion.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-admin-dashboard-with-user-management-request-management-and-analytics-charts-using-backend-provided-aggregated-metrics",
+      "title": "Implement the Admin Dashboard with user management, request management, and analytics charts using backend-provided aggregated metrics.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-live-chat-messaging-between-students-and-helpers-for-a-request-task-using-polling-no-websockets-with-message-threads-stored-in-the-backend-include-basic-unread-notification-indicators-in-the-ui",
+      "title": "Implement live chat messaging between students and helpers for a request/task using polling (no WebSockets) with message threads stored in the backend; include basic unread/notification indicators in the UI.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-search-and-filtering-for-requests-including-location-based-filtering-for-offline-help-requests",
+      "title": "Add search and filtering for requests, including location-based filtering for offline help requests.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-seo-friendly-structure-for-the-spa-by-adding-appropriate-document-titles-meta-descriptions-where-feasible-and-semantic-markup-on-the-landing-page-and-key-public-routes",
+      "title": "Ensure SEO-friendly structure for the SPA by adding appropriate document titles, meta descriptions where feasible, and semantic markup on the landing page and key public routes.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-deployment-ready-build-for-the-internet-computer-project-with-clear-hosting-deployment-instructions-dfx-build-deploy-steps-environment-configuration-if-any-and-how-to-obtain-the-live-canister-urls-after-deployment",
+      "title": "Provide a deployment-ready build for the Internet Computer project with clear hosting/deployment instructions (dfx build/deploy steps, environment configuration if any) and how to obtain the live canister URLs after deployment.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enforce-the-no-file-upload-options-anywhere-requirement-across-the-entire-ui-and-backend-by-not-implementing-any-file-upload-inputs-endpoints",
+      "title": "Enforce the \"no file upload options anywhere\" requirement across the entire UI and backend by not implementing any file upload inputs/endpoints.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-include-a-small-set-of-custom-static-marketing-images-logo-landing-hero-illustration-and-render-them-in-the-frontend-as-static-assets-from-frontend-public-assets-generated-not-served-via-backend",
+      "title": "Generate and include a small set of custom static marketing images (logo + landing hero illustration) and render them in the frontend as static assets from frontend/public/assets/generated (not served via backend).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-global-visual-design-system-to-a-premium-saas-style-using-glassmorphism-blurred-translucent-surfaces-smooth-blue-purple-cyan-gradients-softer-shadows-and-more-rounded-component-shapes-across-all-pages-while-keeping-all-user-facing-text-in-english",
+      "title": "Update the global visual design system to a premium SaaS style using glassmorphism (blurred translucent surfaces), smooth blue–purple–cyan gradients, softer shadows, and more-rounded component shapes across all pages while keeping all user-facing text in English.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-reusable-non-ui-folder-wrapper-components-utilities-for-the-premium-styling-e-g-glass-cards-containers-glass-inputs-and-glow-gradient-buttons-and-refactor-existing-pages-to-use-them-without-editing-any-files-under-frontend-src-components-ui",
+      "title": "Implement reusable non-UI-folder wrapper components/utilities for the premium styling (e.g., glass cards/containers, glass inputs, and glow/gradient buttons) and refactor existing pages to use them without editing any files under frontend/src/components/ui.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-the-landing-page-to-a-full-screen-premium-hero-section-that-includes-1-animated-typing-headline-behavior-2-floating-animated-background-shapes-3-hover-glow-effects-on-buttons-and-4-scroll-reveal-animations-for-each-major-section-matching-the-new-blue-purple-cyan-theme",
+      "title": "Upgrade the Landing Page to a full-screen premium hero section that includes (1) animated typing headline behavior, (2) floating animated background shapes, (3) hover glow effects on buttons, and (4) scroll-reveal animations for each major section, matching the new blue–purple–cyan theme.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-modernize-all-authentication-and-request-forms-login-create-account-signup-student-request-help-freelancing-help-to-use-rounded-glass-style-inputs-with-focus-glow-premium-spacing-and-mobile-first-responsiveness-improvements",
+      "title": "Modernize all authentication and request forms (Login, Create Account/Signup, Student Request Help, Freelancing Help) to use rounded glass-style inputs with focus glow, premium spacing, and mobile-first responsiveness improvements.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-dashboards-student-helper-admin-with-a-modern-sidebar-navigation-that-includes-icons-provides-role-appropriate-navigation-links-and-remains-responsive-collapsible-drawer-behavior-on-mobile",
+      "title": "Upgrade dashboards (Student, Helper, Admin) with a modern sidebar navigation that includes icons, provides role-appropriate navigation links, and remains responsive (collapsible/drawer behavior on mobile).",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-animated-statistics-cards-and-gradient-section-headers-to-dashboard-pages-using-lightweight-animations-and-the-blue-purple-cyan-gradient-theme",
+      "title": "Add animated statistics cards and gradient section headers to dashboard pages, using lightweight animations and the blue–purple–cyan gradient theme.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-smooth-transitions-between-pages-and-key-ui-state-changes-tabs-dialogs-section-reveals-while-keeping-animations-lightweight-and-respecting-reduced-motion-preferences",
+      "title": "Add smooth transitions between pages and key UI state changes (tabs, dialogs, section reveals) while keeping animations lightweight and respecting reduced-motion preferences.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-micro-animations-across-the-ui-subtle-hover-scale-on-cards-improved-loading-animations-for-request-heavy-views-and-an-animated-success-confirmation-after-form-submission-e-g-requestsuccessbanner",
+      "title": "Implement micro-animations across the UI: subtle hover-scale on cards, improved loading animations for request-heavy views, and an animated success confirmation after form submission (e.g., RequestSuccessBanner).",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-performance-and-accessibility-quality-for-the-new-ui-animations-remain-smooth-on-mobile-layouts-are-responsive-at-common-breakpoints-and-dark-light-mode-maintains-accessible-contrast-include-a-premium-toggle-switch-control-in-the-header-for-theme-switching-with-a-smooth-theme-transition",
+      "title": "Ensure performance and accessibility quality for the new UI: animations remain smooth on mobile, layouts are responsive at common breakpoints, and dark/light mode maintains accessible contrast; include a premium toggle switch control in the header for theme switching with a smooth theme transition.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Landing page with modern UI, gradient theme, smooth/scroll animations, hover effects, and animated hero typing text",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Dark mode / Light mode toggle across the site",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Authentication system: login (email/password + role selection) and create account (name/age/email/password/country + role radio buttons)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Student Request Help page with required form fields, subject/topic as text description boxes, online/offline selection with conditional offline address fields, and submit (no file uploads)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Freelancing & Service Help page as a help request section (title + large description + submit), with category cards removed",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Student dashboard: view submitted requests, statuses (Pending/Accepted/Completed), and chat with helper",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Helper dashboard: view available requests, accept tasks, submit completed work, and student rating system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Admin dashboard: manage users/requests and view analytics charts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Backend API with secure authentication, password encryption, and role-based access control",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Database models for Users, Requests, Tasks, Ratings, and Messages",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Live chat messaging system between student and helper",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Notification alerts system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Search and filter requests, including location-based filtering for offline help",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Rating and review system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "SEO-friendly structure",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Deployment-ready build with hosting instructions and a live preview link",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Implement backend data models and persistence for Users, Requests, Tasks, Ratings, and Messages, and expose a complete set of backend APIs needed by the frontend flows.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Upgrade global UI to premium SaaS look: glassmorphism cards (blur), blue–purple–cyan gradient theme, soft shadows/rounded components, and modern professional fonts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Landing page premium animation pass: full-screen animated hero, headline typing animation, floating animated background shapes, button hover glow, and scroll-reveal section animations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Modernize forms (Login/Signup/Request Help): rounded glass inputs, focus-glow while typing, improved mobile spacing, and smooth button hover animations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Dashboard UI upgrade: modern icon sidebar navigation, animated statistics cards, gradient section headers, and smooth page-to-page transitions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Micro-animations + UX feedback: subtle hover-scale on cards, loading animations for requests, and success confirmation animation after form submission (keep lightweight/performance-friendly)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "EduBridge – Global Student Help & Freelancing Platform",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
