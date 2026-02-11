@@ -1,15 +1,24 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
-  "summary": "Full-stack responsive web application \"EduBridge – Global Student Help & Freelancing Platform\" connecting students, helpers/freelancers, and businesses with role-based authentication, help request flows (online/offline), dashboards, chat, ratings, search/filtering, notifications, deployment-ready build, and an upgraded premium SaaS-level UI featuring glassmorphism, blue–purple–cyan gradients, modern typography, dark/light mode, and lightweight micro-animations across all pages.",
+  "projectStateVersion": 15,
+  "summary": "Full-stack responsive web application \"EduBridge – Global Student Help & Freelancing Platform\" with an owner-only Admin experience: separate user vs owner entry points, users can submit work requests, and all submissions must be delivered to the single site owner both inside the Admin inbox/chat and via Telegram channel notifications, while strictly preventing non-admin users from accessing any Admin pages.",
   "architectural_notes": [
     "Role-based access control with roles: Student, Helper/Freelancer, Business, Admin.",
     "Requests support Online vs Offline; Offline requires additional location fields (location/city/address).",
     "Core data entities: Users, Requests, Tasks, Ratings, Messages.",
-    "Visual design direction updated to premium SaaS UI using glassmorphism (blurred cards) and a blue–purple–cyan gradient palette, with lightweight micro-animations and strong accessibility contrast in both light/dark modes."
+    "Visual design direction updated to premium SaaS UI using glassmorphism (blurred cards) and a blue–purple–cyan gradient palette, with lightweight micro-animations and strong accessibility contrast in both light/dark modes.",
+    "Admin section must be inaccessible to non-admin users via frontend route guards and backend authorization; only Admin (site owner) can access admin pages.",
+    "Introduce an owner-centric intake flow: all request form submissions should be visible to the site owner for response and follow-up (inbox + chat).",
+    "Owner is the single Admin; Admin pages should be customized for the owner and remain inaccessible to all non-admin roles.",
+    "Work request submissions must fan-out to two destinations: (1) internal owner Admin inbox/chat and (2) Telegram channel notifications (techcrunchz)."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Draft app/preview expired after deployment; requires rebuild to continue making changes.",
+    "Custom domain/slug must be 5–50 characters and contain only letters, numbers, and hyphens (no special characters like '&' or punctuation).",
+    "Help request submission is failing for users with error \"unable to send message\" when trying to write/submit a help request.",
+    "User reports current build is \"not going\" / not working as expected (needs clarification on what is failing: request submission, chat, routing, or admin access)."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-the-core-information-architecture-and-routing-for-edubridge-with-the-following-pages-screens-landing-login-create-account-student-request-help-freelancing-service-help-student-dashboard-helper-dashboard-admin-dashboard-and-a-not-found-page",
@@ -210,6 +219,78 @@
         "REQ-26"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-collect-and-confirm-a-concrete-itemized-list-of-the-user-s-requested-changes-before-starting-implementation-including-a-which-page-s-screen-s-the-change-applies-to-b-the-exact-current-behavior-content-c-the-exact-desired-behavior-content-english-user-facing-text-and-d-how-to-verify-the-change-is-correct",
+      "title": "Collect and confirm a concrete, itemized list of the user’s requested changes before starting implementation, including (a) which page(s)/screen(s) the change applies to, (b) the exact current behavior/content, (c) the exact desired behavior/content (English user-facing text), and (d) how to verify the change is correct.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enforce-that-only-users-with-the-admin-role-can-access-any-admin-section-ui-and-any-admin-only-backend-operations-all-non-admin-users-including-student-helper-and-business-roles-must-be-prevented-from-entering-the-admin-route-and-must-not-be-able-to-invoke-admin-only-backend-apis",
+      "title": "Enforce that only users with the Admin role can access any Admin section UI and any admin-only backend operations; all non-admin users (including student, helper, and business roles) must be prevented from entering the admin route and must not be able to invoke admin-only backend APIs.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-help-request-submission-flow-so-that-users-can-successfully-submit-a-help-request-from-the-student-request-help-page-and-the-freelancing-help-page-without-getting-an-error-like-unable-to-send-message-ensure-the-backend-authorization-logic-matches-the-roles-allowed-to-access-these-pages-and-that-the-frontend-displays-a-successful-submission-state-when-the-backend-accepts-the-request",
+      "title": "Fix the help-request submission flow so that users can successfully submit a help request from the Student Request Help page and the Freelancing Help page without getting an error like “unable to send message”. Ensure the backend authorization logic matches the roles allowed to access these pages, and that the frontend displays a successful submission state when the backend accepts the request.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-error-handling-for-failed-help-request-submissions-so-that-the-ui-no-longer-shows-misleading-messaging-e-g-unable-to-send-message-for-request-creation-failures-map-backend-errors-traps-from-request-creation-to-a-user-friendly-english-toast-message-on-both-help-request-pages",
+      "title": "Improve error handling for failed help-request submissions so that the UI no longer shows misleading messaging (e.g., “unable to send message”) for request creation failures. Map backend errors/traps from request creation to a user-friendly English toast message on both help-request pages.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-clearly-separated-entry-points-areas-for-regular-users-vs-the-single-site-owner-admin-add-a-dedicated-owner-area-route-e-g-owner-or-dashboard-owner-that-is-only-accessible-to-the-admin-role-and-add-a-dedicated-user-work-request-route-e-g-work-request-that-is-accessible-to-authenticated-non-admin-users",
+      "title": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-request-submission-permissions-so-that-authenticated-non-admin-users-can-submit-work-requests-without-being-blocked-by-the-current-only-students-and-businesses-can-create-requests-restriction-as-shown-in-the-provided-screenshot-ensure-the-backend-authorization-and-frontend-gating-messages-match-the-new-rule",
+      "title": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-owner-inbox-inside-the-owner-admin-session-that-shows-all-submitted-work-requests-from-all-users-and-provides-a-per-request-detail-view-with-access-to-the-embedded-in-website-chat-thread-for-that-request",
+      "title": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-send-a-telegram-notification-for-every-newly-submitted-work-request-to-the-telegram-channel-url-provided-by-the-user-https-t-me-techcrunchz-add-a-secure-configuration-mechanism-for-the-required-telegram-bot-credentials-e-g-bot-token-and-target-chat-channel-id-and-surface-a-clear-admin-only-ui-state-indicating-whether-telegram-notifications-are-configured-and-working",
+      "title": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-admin-owner-dashboard-fully-customized-for-the-single-business-owner-by-redesigning-the-admin-dashboard-ia-and-copy-to-reflect-an-owner-console-owner-inbox-requests-users-analytics-while-keeping-admin-only-protections-intact",
+      "title": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -345,6 +426,64 @@
       "id": "AR-32",
       "summary": "Micro-animations + UX feedback: subtle hover-scale on cards, loading animations for requests, and success confirmation animation after form submission (keep lightweight/performance-friendly)",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Route-guard the Admin section so that only Admin (site owner) can access it; prevent all other users from entering admin pages.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Owner inbox for all form submissions: when any student/client/business submits a request form, it appears directly to the site owner inside the website for review and reply (no email requirement).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add a site-owner chat section to interact with students/clients/businesses about their submitted requests (owner can reply from inside the site).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Create separate, clearly distinguished pages/areas for regular users vs the site owner (owner-only entry point to Admin/management views)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Telegram channel integration: send every user work-request submission to https://t.me/techcrunchz (in addition to storing/showing it in the site owner Admin inbox)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Customize the Admin page/dashboard specifically for the single site owner (personalized owner-only management UI)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Add an in-website chat session so the owner can chat with users about their work requests from inside the site (Admin session)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Enforce the “single owner” expectation: prevent creation/assignment of additional Admin users beyond the business owner, and ensure only the owner can access owner-only admin operations.",
+      "reqIds": [
+        "REQ-37"
+      ],
       "status": "pending"
     }
   ],

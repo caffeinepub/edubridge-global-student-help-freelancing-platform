@@ -42,6 +42,15 @@ export interface RequestWithTextTasks {
   'locationInfo' : [] | [Location],
 }
 export type Time = bigint;
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface UserProfile {
   'name' : string,
   'role' : UserRole,
@@ -56,14 +65,24 @@ export type UserRole = { 'helper' : null } |
 export type UserRole__1 = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'acceptRequest' : ActorMethod<[bigint], undefined>,
   'addRating' : ActorMethod<[bigint, Principal, bigint, string], undefined>,
   'addTask' : ActorMethod<[bigint, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
+  'completeInitialization' : ActorMethod<[], undefined>,
   'completeRequest' : ActorMethod<[bigint], undefined>,
-  'createRequest' : ActorMethod<[string, string, [] | [Location]], bigint>,
+  'createRequest' : ActorMethod<
+    [string, string, [] | [Location], string],
+    bigint
+  >,
   'deleteRequest' : ActorMethod<[bigint], undefined>,
   'deleteUser' : ActorMethod<[Principal], undefined>,
   'filterRequestsByCity' : ActorMethod<[string], Array<RequestWithTextTasks>>,
@@ -98,12 +117,18 @@ export interface _SERVICE {
     [RequestStatus],
     Array<RequestWithTextTasks>
   >,
+  'getTelegramConfigStatus' : ActorMethod<
+    [],
+    { 'isConfigured' : boolean, 'chatId' : [] | [string] }
+  >,
   'getUnreadMessageCount' : ActorMethod<[bigint], bigint>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'markMessageAsRead' : ActorMethod<[bigint], undefined>,
-  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], string>,
   'sendMessage' : ActorMethod<[bigint, string], bigint>,
+  'setTelegramConfig' : ActorMethod<[string, string], undefined>,
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

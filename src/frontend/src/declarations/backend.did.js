@@ -60,6 +60,24 @@ export const Message = IDL.Record({
   'sender' : IDL.Principal,
   'timestamp' : Time,
 });
+export const http_header = IDL.Record({
+  'value' : IDL.Text,
+  'name' : IDL.Text,
+});
+export const http_request_result = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
+export const TransformationInput = IDL.Record({
+  'context' : IDL.Vec(IDL.Nat8),
+  'response' : http_request_result,
+});
+export const TransformationOutput = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -67,9 +85,10 @@ export const idlService = IDL.Service({
   'addRating' : IDL.Func([IDL.Nat, IDL.Principal, IDL.Nat, IDL.Text], [], []),
   'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+  'completeInitialization' : IDL.Func([], [], []),
   'completeRequest' : IDL.Func([IDL.Nat], [], []),
   'createRequest' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Opt(Location)],
+      [IDL.Text, IDL.Text, IDL.Opt(Location), IDL.Text],
       [IDL.Nat],
       [],
     ),
@@ -128,6 +147,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(RequestWithTextTasks)],
       ['query'],
     ),
+  'getTelegramConfigStatus' : IDL.Func(
+      [],
+      [IDL.Record({ 'isConfigured' : IDL.Bool, 'chatId' : IDL.Opt(IDL.Text) })],
+      ['query'],
+    ),
   'getUnreadMessageCount' : IDL.Func([IDL.Nat], [IDL.Nat], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -136,8 +160,14 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'markMessageAsRead' : IDL.Func([IDL.Nat], [], []),
-  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [IDL.Text], []),
   'sendMessage' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+  'setTelegramConfig' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'transform' : IDL.Func(
+      [TransformationInput],
+      [TransformationOutput],
+      ['query'],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -195,6 +225,21 @@ export const idlFactory = ({ IDL }) => {
     'sender' : IDL.Principal,
     'timestamp' : Time,
   });
+  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const http_request_result = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
+  const TransformationInput = IDL.Record({
+    'context' : IDL.Vec(IDL.Nat8),
+    'response' : http_request_result,
+  });
+  const TransformationOutput = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -202,9 +247,10 @@ export const idlFactory = ({ IDL }) => {
     'addRating' : IDL.Func([IDL.Nat, IDL.Principal, IDL.Nat, IDL.Text], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+    'completeInitialization' : IDL.Func([], [], []),
     'completeRequest' : IDL.Func([IDL.Nat], [], []),
     'createRequest' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Opt(Location)],
+        [IDL.Text, IDL.Text, IDL.Opt(Location), IDL.Text],
         [IDL.Nat],
         [],
       ),
@@ -267,6 +313,16 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(RequestWithTextTasks)],
         ['query'],
       ),
+    'getTelegramConfigStatus' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'isConfigured' : IDL.Bool,
+            'chatId' : IDL.Opt(IDL.Text),
+          }),
+        ],
+        ['query'],
+      ),
     'getUnreadMessageCount' : IDL.Func([IDL.Nat], [IDL.Nat], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -275,8 +331,14 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'markMessageAsRead' : IDL.Func([IDL.Nat], [], []),
-    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [IDL.Text], []),
     'sendMessage' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+    'setTelegramConfig' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'transform' : IDL.Func(
+        [TransformationInput],
+        [TransformationOutput],
+        ['query'],
+      ),
   });
 };
 

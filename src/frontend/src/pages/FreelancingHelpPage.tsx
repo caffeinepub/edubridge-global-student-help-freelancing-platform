@@ -5,24 +5,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateRequest } from '../hooks/useRequests';
+import { useAuth } from '../hooks/useAuth';
 import RequestSuccessBanner from '../components/requests/RequestSuccessBanner';
 import { usePageTitle } from '../seo/usePageTitle';
 import { toast } from 'sonner';
 import { Send, Sparkles } from 'lucide-react';
 import FloatingShapes from '../components/animation/FloatingShapes';
+import { getHelpRequestErrorMessage } from '../utils/helpRequestErrors';
+import { UserRole } from '../backend';
 
 export default function FreelancingHelpPage() {
   usePageTitle('Freelancing Help');
   const [submitted, setSubmitted] = useState(false);
   const createRequestMutation = useCreateRequest();
+  const { userProfile, isAuthenticated, isProfileReady } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
   });
 
+  const canSubmitRequest = isAuthenticated && isProfileReady && 
+    (userProfile?.role === UserRole.student || userProfile?.role === UserRole.business);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check authentication
+    if (!isAuthenticated) {
+      toast.error('Please log in to submit a help request.');
+      return;
+    }
+
+    // Check if profile is ready
+    if (!isProfileReady || !userProfile) {
+      toast.error('Please complete your profile setup first.');
+      return;
+    }
+
+    // Check role permission
+    if (!canSubmitRequest) {
+      toast.error('You do not have permission to submit help requests. Only students and businesses can create requests.');
+      return;
+    }
 
     if (!formData.title || !formData.description) {
       toast.error('Please fill in all fields');
@@ -37,7 +62,8 @@ export default function FreelancingHelpPage() {
       });
       setSubmitted(true);
     } catch (error) {
-      toast.error('Failed to submit request');
+      const errorMessage = getHelpRequestErrorMessage(error);
+      toast.error(errorMessage);
     }
   };
 

@@ -1,4 +1,4 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet, Navigate } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import AppLayout from './components/layout/AppLayout';
@@ -10,6 +10,10 @@ import FreelancingHelpPage from './pages/FreelancingHelpPage';
 import StudentDashboardPage from './pages/dashboards/StudentDashboardPage';
 import HelperDashboardPage from './pages/dashboards/HelperDashboardPage';
 import AdminDashboardPage from './pages/dashboards/AdminDashboardPage';
+import WorkRequestPage from './pages/WorkRequestPage';
+import OwnerConsolePage from './pages/owner/OwnerConsolePage';
+import OwnerInboxPage from './pages/owner/OwnerInboxPage';
+import OwnerRequestDetailPage from './pages/owner/OwnerRequestDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -42,17 +46,31 @@ const createAccountRoute = createRoute({
   component: CreateAccountPage,
 });
 
-const studentRequestRoute = createRoute({
+// New work request route for authenticated non-admin users
+const workRequestRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/student-request-help',
+  path: '/work-request',
   component: () => (
-    <ProtectedRoute requiredRole="student">
-      <StudentRequestHelpPage />
+    <ProtectedRoute nonAdminOnly>
+      <WorkRequestPage />
     </ProtectedRoute>
   ),
 });
 
-const freelancingRoute = createRoute({
+// Redirect old routes to new work request route
+const requestHelpRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/request-help',
+  component: () => <Navigate to="/work-request" />,
+});
+
+const studentRequestRedirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/student-request-help',
+  component: () => <Navigate to="/work-request" />,
+});
+
+const freelancingHelpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/freelancing-help',
   component: () => (
@@ -66,7 +84,7 @@ const studentDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/student',
   component: () => (
-    <ProtectedRoute requiredRole="student">
+    <ProtectedRoute>
       <StudentDashboardPage />
     </ProtectedRoute>
   ),
@@ -76,18 +94,46 @@ const helperDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/helper',
   component: () => (
-    <ProtectedRoute requiredRole="helper">
+    <ProtectedRoute>
       <HelperDashboardPage />
     </ProtectedRoute>
   ),
 });
 
+// Redirect admin dashboard to owner console
 const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/admin',
+  component: () => <Navigate to="/owner" />,
+});
+
+// Owner Console routes (admin-only)
+const ownerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/owner',
   component: () => (
     <ProtectedRoute requiredRole="admin">
-      <AdminDashboardPage />
+      <OwnerConsolePage />
+    </ProtectedRoute>
+  ),
+});
+
+const ownerInboxRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/owner/inbox',
+  component: () => (
+    <ProtectedRoute requiredRole="admin">
+      <OwnerInboxPage />
+    </ProtectedRoute>
+  ),
+});
+
+const ownerRequestDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/owner/inbox/$requestId',
+  component: () => (
+    <ProtectedRoute requiredRole="admin">
+      <OwnerRequestDetailPage />
     </ProtectedRoute>
   ),
 });
@@ -102,11 +148,16 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   createAccountRoute,
-  studentRequestRoute,
-  freelancingRoute,
+  workRequestRoute,
+  requestHelpRoute,
+  studentRequestRedirectRoute,
+  freelancingHelpRoute,
   studentDashboardRoute,
   helperDashboardRoute,
   adminDashboardRoute,
+  ownerRoute,
+  ownerInboxRoute,
+  ownerRequestDetailRoute,
   notFoundRoute,
 ]);
 

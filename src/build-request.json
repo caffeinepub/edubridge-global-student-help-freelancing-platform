@@ -1,31 +1,154 @@
 {
   "kind": "build_request",
-  "title": "Premium SaaS UI upgrade request (already implemented by existing features)",
+  "title": "Separate User vs Owner experience, owner-only inbox/chat, and Telegram notifications for work requests",
   "priority": "normal",
-  "requirements": [],
+  "requirements": [
+    {
+      "id": "REQ-31",
+      "text": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "U should make a saparate page for users and owners.."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to the Owner route requires Admin access; non-admin users see an Access Denied experience.",
+        "Navigating to the User Work Request route is possible for authenticated non-admin users.",
+        "Navigation/UI makes it obvious which area is for Users vs Owner (user-facing text remains in English)."
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "text": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Allow users to send work requests",
+          "Only user request for work should come in my telegram channel",
+          "You do not have permission to submit help requests. Only students and businesses can create requests."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A logged-in user with role helper/student/business can submit a request successfully (no permission toast/trap).",
+        "Frontend no longer shows the old restriction text when the user is allowed; if a user is blocked, the message explains the actual rule in English.",
+        "Backend createRequest (or the new work-request API if introduced) enforces the same permission rule as the frontend."
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "text": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Only user request for work should come in my telegram channel and as well as in this website where I use the Admin session.",
+          "And add a chat session in this website itself."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When logged in as Admin, the Owner can see a list of all requests and open any request to view its details and chat thread.",
+        "Non-admin users cannot access the Owner Inbox route(s) even if they guess the URL."
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "text": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "And add a chat session in this website itself.",
+          "Only user request for work should come in ... in this website where I use the Admin session."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin can send messages on any request chat thread without getting an authorization trap.",
+        "Admin can fetch messages and unread counts for any request.",
+        "Existing rule still holds: non-admin users can only chat on request threads they are allowed to access (request owner and assigned helper)."
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "text": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "And u should add this telegram channel for sending work requests.\nhttps://t.me/techcrunchz"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On successful request creation, the backend attempts to send a Telegram message containing the request title + description + requester principal (or display name if available) + request id.",
+        "If Telegram credentials are not configured, request creation still succeeds, and the Owner UI shows an admin-only warning that Telegram is not configured.",
+        "If Telegram sending fails, the failure is captured in logs/returned status (as appropriate) and does not prevent storing the request in the canister; the Owner UI indicates the failure in English."
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "text": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Nake the admin page only for me fully customised",
+          "I am the one and only owner of this business."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin page title and headings reflect an Owner-focused console (English UI text).",
+        "Owner Console prioritizes Inbox/Requests and chat entry points; existing admin capabilities (users/requests/analytics) remain available unless explicitly removed.",
+        "Non-admin users are still blocked from all admin/owner UI routes."
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "text": "Enforce the “single owner” expectation: prevent creation/assignment of additional Admin users beyond the business owner, and ensure only the owner can access owner-only admin operations.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "I am the one and only owner of this business."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend rejects attempts by any non-owner to assign or save a profile with role #admin.",
+        "If an owner is already established, attempts to create another admin are rejected with a clear error message (English) that the frontend can present cleanly.",
+        "Owner-only backend operations remain callable only by the owner Admin principal."
+      ]
+    }
+  ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (read-only UI component sources must be composed, not edited).",
-    "Keep all user-facing text in English.",
-    "Maintain the global constraint: no file upload inputs or backend endpoints.",
-    "Backend must remain single-actor (all Motoko logic in backend/main.mo); only add migration.mo if state upgrade is required."
+    "Backend must remain a single Motoko actor in backend/main.mo; add backend/migration.mo only if an upgrade/state migration is required.",
+    "Do not edit any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Do not implement file uploads anywhere in the UI or backend.",
+    "No WebSockets; chat must continue using polling.",
+    "Telegram integration must not require external databases; all persistence must remain in the canister state."
   ],
   "nonGoals": [
-    "Add new product features beyond the requested UI/UX upgrades (e.g., new pages, new workflows, new backend models/APIs).",
-    "Introduce third-party auth providers (only Internet Identity is supported).",
-    "Add real-time communication via WebSockets (polling only)."
+    "Implementing Telegram ‘channel join’/membership management features.",
+    "Adding third-party authentication providers beyond the existing Internet Identity flow.",
+    "Building a real-time chat system (WebSockets) or push notifications.",
+    "Creating multiple owners or multi-tenant admin support."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

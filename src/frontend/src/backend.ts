@@ -89,19 +89,25 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
 export interface Location {
     city: string;
     address: string;
 }
-export interface Rating {
-    requestId: bigint;
-    studentUserId: Principal;
-    createdAt: Time;
-    score: bigint;
-    comment: string;
-    helperUserId: Principal;
+export interface TransformationOutput {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
 }
 export type Time = bigint;
+export interface TransformationInput {
+    context: Uint8Array;
+    response: http_request_result;
+}
 export interface RequestWithTextTasks {
     id: bigint;
     status: RequestStatus;
@@ -112,6 +118,14 @@ export interface RequestWithTextTasks {
     description: string;
     assignedHelper?: Principal;
     locationInfo?: Location;
+}
+export interface Rating {
+    requestId: bigint;
+    studentUserId: Principal;
+    createdAt: Time;
+    score: bigint;
+    comment: string;
+    helperUserId: Principal;
 }
 export interface Message {
     id: bigint;
@@ -127,6 +141,10 @@ export interface UserProfile {
     biography?: string;
     organization?: string;
     skills?: string;
+}
+export interface http_header {
+    value: string;
+    name: string;
 }
 export enum RequestStatus {
     pending = "pending",
@@ -150,8 +168,9 @@ export interface backendInterface {
     addRating(requestId: bigint, helperUser: Principal, score: bigint, comment: string): Promise<void>;
     addTask(requestId: bigint, task: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole__1): Promise<void>;
+    completeInitialization(): Promise<void>;
     completeRequest(requestId: bigint): Promise<void>;
-    createRequest(title: string, description: string, location: Location | null): Promise<bigint>;
+    createRequest(title: string, description: string, location: Location | null, telegramChannelUrl: string): Promise<bigint>;
     deleteRequest(requestId: bigint): Promise<void>;
     deleteUser(user: Principal): Promise<void>;
     filterRequestsByCity(city: string): Promise<Array<RequestWithTextTasks>>;
@@ -177,12 +196,18 @@ export interface backendInterface {
     getPendingRequestsForUser(user: Principal): Promise<Array<RequestWithTextTasks>>;
     getRatingsByUser(user: Principal): Promise<Array<Rating>>;
     getRequestsByStatus(status: RequestStatus): Promise<Array<RequestWithTextTasks>>;
+    getTelegramConfigStatus(): Promise<{
+        isConfigured: boolean;
+        chatId?: string;
+    }>;
     getUnreadMessageCount(requestId: bigint): Promise<bigint>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     markMessageAsRead(messageId: bigint): Promise<void>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveCallerUserProfile(profile: UserProfile): Promise<string>;
     sendMessage(requestId: bigint, content: string): Promise<bigint>;
+    setTelegramConfig(botToken: string, chatId: string): Promise<void>;
+    transform(input: TransformationInput): Promise<TransformationOutput>;
 }
 import type { Location as _Location, RequestStatus as _RequestStatus, RequestWithTextTasks as _RequestWithTextTasks, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole, UserRole__1 as _UserRole__1 } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -257,6 +282,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async completeInitialization(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.completeInitialization();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.completeInitialization();
+            return result;
+        }
+    }
     async completeRequest(arg0: bigint): Promise<void> {
         if (this.processError) {
             try {
@@ -271,17 +310,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async createRequest(arg0: string, arg1: string, arg2: Location | null): Promise<bigint> {
+    async createRequest(arg0: string, arg1: string, arg2: Location | null, arg3: string): Promise<bigint> {
         if (this.processError) {
             try {
-                const result = await this.actor.createRequest(arg0, arg1, to_candid_opt_n3(this._uploadFile, this._downloadFile, arg2));
+                const result = await this.actor.createRequest(arg0, arg1, to_candid_opt_n3(this._uploadFile, this._downloadFile, arg2), arg3);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createRequest(arg0, arg1, to_candid_opt_n3(this._uploadFile, this._downloadFile, arg2));
+            const result = await this.actor.createRequest(arg0, arg1, to_candid_opt_n3(this._uploadFile, this._downloadFile, arg2), arg3);
             return result;
         }
     }
@@ -531,6 +570,23 @@ export class Backend implements backendInterface {
             return from_candid_vec_n4(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getTelegramConfigStatus(): Promise<{
+        isConfigured: boolean;
+        chatId?: string;
+    }> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getTelegramConfigStatus();
+                return from_candid_record_n23(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getTelegramConfigStatus();
+            return from_candid_record_n23(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getUnreadMessageCount(arg0: bigint): Promise<bigint> {
         if (this.processError) {
             try {
@@ -587,17 +643,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
+    async saveCallerUserProfile(arg0: UserProfile): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n23(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n24(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n23(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n24(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -612,6 +668,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.sendMessage(arg0, arg1);
+            return result;
+        }
+    }
+    async setTelegramConfig(arg0: string, arg1: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setTelegramConfig(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setTelegramConfig(arg0, arg1);
+            return result;
+        }
+    }
+    async transform(arg0: TransformationInput): Promise<TransformationOutput> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.transform(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.transform(arg0);
             return result;
         }
     }
@@ -662,6 +746,18 @@ function from_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uin
         biography: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.biography)),
         organization: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.organization)),
         skills: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.skills))
+    };
+}
+function from_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    isConfigured: boolean;
+    chatId: [] | [string];
+}): {
+    isConfigured: boolean;
+    chatId?: string;
+} {
+    return {
+        isConfigured: value.isConfigured,
+        chatId: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.chatId))
     };
 }
 function from_candid_record_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -741,19 +837,19 @@ function from_candid_vec_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function to_candid_RequestStatus_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: RequestStatus): _RequestStatus {
     return to_candid_variant_n22(_uploadFile, _downloadFile, value);
 }
-function to_candid_UserProfile_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
-    return to_candid_record_n24(_uploadFile, _downloadFile, value);
+function to_candid_UserProfile_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
+    return to_candid_record_n25(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole__1_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole__1): _UserRole__1 {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_UserRole_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
-    return to_candid_variant_n26(_uploadFile, _downloadFile, value);
+function to_candid_UserRole_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
+    return to_candid_variant_n27(_uploadFile, _downloadFile, value);
 }
 function to_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Location | null): [] | [_Location] {
     return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     name: string;
     role: UserRole;
     biography?: string;
@@ -768,7 +864,7 @@ function to_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8
 } {
     return {
         name: value.name,
-        role: to_candid_UserRole_n25(_uploadFile, _downloadFile, value.role),
+        role: to_candid_UserRole_n26(_uploadFile, _downloadFile, value.role),
         biography: value.biography ? candid_some(value.biography) : candid_none(),
         organization: value.organization ? candid_some(value.organization) : candid_none(),
         skills: value.skills ? candid_some(value.skills) : candid_none()
@@ -804,7 +900,7 @@ function to_candid_variant_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint
         accepted: null
     } : value;
 }
-function to_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
+function to_candid_variant_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     helper: null;
 } | {
     admin: null;

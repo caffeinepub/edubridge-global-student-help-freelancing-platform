@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { RequestWithTextTasks, Location, RequestStatus } from '../backend';
 
+const TELEGRAM_CHANNEL_URL = 'https://t.me/techcrunchz';
+
 export function useCreateRequest() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -17,7 +19,12 @@ export function useCreateRequest() {
       location: Location | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createRequest(title, description, location);
+      try {
+        return await actor.createRequest(title, description, location, TELEGRAM_CHANNEL_URL);
+      } catch (error) {
+        // Re-throw with original error to preserve backend error messages
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myRequests'] });

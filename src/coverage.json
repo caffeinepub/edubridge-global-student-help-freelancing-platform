@@ -1,40 +1,140 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T11:09:28.707Z",
+  "generatedAt": "2026-02-11T14:25:10.102Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 0,
-    "implemented": 0,
-    "items": []
+    "total": 7,
+    "implemented": 5,
+    "items": [
+      {
+        "id": "REQ-31",
+        "summary": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/routes/ProtectedRoute.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/routes/ProtectedRoute.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-32",
+        "summary": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/StudentRequestHelpPage.tsx",
+          "frontend/src/pages/FreelancingHelpPage.tsx",
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/utils/helpRequestErrors.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/utils/helpRequestErrors.ts"
+        ]
+      },
+      {
+        "id": "REQ-33",
+        "summary": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/pages/owner/OwnerInboxPage.tsx",
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/pages/owner/OwnerInboxPage.tsx",
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-35",
+        "summary": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useAdmin.ts",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "frontend/src/hooks/useRequests.ts",
+          "frontend/src/pages/StudentRequestHelpPage.tsx",
+          "frontend/src/pages/WorkRequestPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useAdmin.ts",
+          "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "frontend/src/hooks/useRequests.ts",
+          "frontend/src/pages/WorkRequestPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-36",
+        "summary": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "frontend/src/pages/dashboards/AdminDashboardPage.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-37",
+        "summary": "Enforce the “single owner” expectation: prevent creation/assignment of additional Admin users beyond the business owner, and ensure only the owner can access owner-only admin operations.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
   },
   "changedFiles": [
+    "backend/http-outcalls/outcall.mo",
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/animation/FloatingShapes.tsx",
     "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/components/marketing/TypingHeroText.tsx",
-    "frontend/src/components/requests/RequestSuccessBanner.tsx",
+    "frontend/src/components/owner/TelegramConfigCard.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/index.css",
-    "frontend/src/pages/CreateAccountPage.tsx",
-    "frontend/src/pages/FreelancingHelpPage.tsx",
-    "frontend/src/pages/LandingPage.tsx",
-    "frontend/src/pages/LoginPage.tsx",
-    "frontend/src/pages/StudentRequestHelpPage.tsx",
-    "frontend/src/pages/dashboards/HelperDashboardPage.tsx",
-    "frontend/src/pages/dashboards/StudentDashboardPage.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/hooks/useAdmin.ts",
+    "frontend/src/hooks/useRequests.ts",
+    "frontend/src/pages/WorkRequestPage.tsx",
+    "frontend/src/pages/owner/OwnerConsolePage.tsx",
+    "frontend/src/pages/owner/OwnerInboxPage.tsx",
+    "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+    "frontend/src/routes/ProtectedRoute.tsx",
+    "frontend/src/utils/helpRequestErrors.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

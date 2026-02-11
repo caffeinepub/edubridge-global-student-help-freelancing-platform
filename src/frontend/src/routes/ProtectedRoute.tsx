@@ -3,16 +3,19 @@ import { useAuth } from '../hooks/useAuth';
 import { Navigate } from '@tanstack/react-router';
 import { UserRole } from '../backend';
 import AccessDeniedScreen from '../components/auth/AccessDeniedScreen';
+import { useIsCallerAdmin } from '../hooks/useAdmin';
 
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRole?: 'student' | 'helper' | 'business' | 'admin';
+  nonAdminOnly?: boolean;
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requiredRole, nonAdminOnly }: ProtectedRouteProps) {
   const { isAuthenticated, isProfileReady, profileLoading, userProfile } = useAuth();
+  const { data: isBackendAdmin, isLoading: checkingAdmin, isFetched: adminCheckFetched } = useIsCallerAdmin();
 
-  if (profileLoading) {
+  if (profileLoading || (requiredRole === 'admin' && checkingAdmin)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -28,6 +31,13 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return <Navigate to="/login" />;
   }
 
+  // Handle non-admin only routes (for regular users)
+  if (nonAdminOnly) {
+    if (userProfile?.role === UserRole.admin) {
+      return <AccessDeniedScreen />;
+    }
+  }
+
   if (requiredRole) {
     const roleMap: Record<string, UserRole> = {
       student: UserRole.student,
@@ -36,8 +46,21 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
       admin: UserRole.admin,
     };
 
-    if (userProfile?.role !== roleMap[requiredRole]) {
-      return <AccessDeniedScreen />;
+    // For admin role, verify both profile role AND backend admin status
+    if (requiredRole === 'admin') {
+      if (userProfile?.role !== roleMap[requiredRole]) {
+        return <AccessDeniedScreen />;
+      }
+      
+      // Additional backend verification for admin
+      if (adminCheckFetched && !isBackendAdmin) {
+        return <AccessDeniedScreen />;
+      }
+    } else {
+      // For non-admin roles, profile check is sufficient
+      if (userProfile?.role !== roleMap[requiredRole]) {
+        return <AccessDeniedScreen />;
+      }
     }
   }
 

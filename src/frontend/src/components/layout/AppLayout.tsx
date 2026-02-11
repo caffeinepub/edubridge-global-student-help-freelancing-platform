@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Moon, Sun, Menu, Sparkles } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { SiX } from 'react-icons/si';
+import { UserRole } from '../../backend';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -20,29 +20,46 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const isLandingPage = currentPath === '/';
 
+  // Helper to check if user is admin
+  const isAdmin = userProfile?.role === UserRole.admin;
+
   const NavLinks = () => (
     <>
       {isAuthenticated && userProfile && (
         <>
-          {userProfile.role === 'student' && (
-            <>
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate({ to: '/dashboard/student' })}
-                className="hover:bg-primary/10 transition-colors"
-              >
-                My Dashboard
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate({ to: '/student-request-help' })}
-                className="hover:bg-primary/10 transition-colors"
-              >
-                Request Help
-              </Button>
-            </>
+          {/* Admin/Owner gets Owner Console link */}
+          {isAdmin && (
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate({ to: '/owner' })}
+              className="hover:bg-primary/10 transition-colors"
+            >
+              Owner Console
+            </Button>
           )}
-          {(userProfile.role === 'helper' || userProfile.role === 'business') && (
+
+          {/* Non-admin users get Work Request link */}
+          {!isAdmin && (
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate({ to: '/work-request' })}
+              className="hover:bg-primary/10 transition-colors"
+            >
+              Work Request
+            </Button>
+          )}
+
+          {/* Role-specific dashboard links for non-admin users */}
+          {userProfile.role === UserRole.student && (
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate({ to: '/dashboard/student' })}
+              className="hover:bg-primary/10 transition-colors"
+            >
+              My Dashboard
+            </Button>
+          )}
+          {(userProfile.role === UserRole.helper || userProfile.role === UserRole.business) && (
             <>
               <Button 
                 variant="ghost" 
@@ -59,15 +76,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 Find Work
               </Button>
             </>
-          )}
-          {userProfile.role === 'admin' && (
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate({ to: '/dashboard/admin' })}
-              className="hover:bg-primary/10 transition-colors"
-            >
-              Admin Dashboard
-            </Button>
           )}
         </>
       )}

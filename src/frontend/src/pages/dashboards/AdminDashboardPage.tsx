@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import AnalyticsCharts from '../../components/admin/AnalyticsCharts';
 import { usePageTitle } from '../../seo/usePageTitle';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Trash2, AlertCircle } from 'lucide-react';
+import AccessDeniedScreen from '../../components/auth/AccessDeniedScreen';
 
 export default function AdminDashboardPage() {
   usePageTitle('Admin Dashboard');
-  const { data: users = [], isLoading: loadingUsers } = useGetAllUsers();
-  const { data: requests = [], isLoading: loadingRequests } = useGetAllRequests();
-  const { data: analytics, isLoading: loadingAnalytics } = useGetAnalytics();
+  const { data: users = [], isLoading: loadingUsers, error: usersError } = useGetAllUsers();
+  const { data: requests = [], isLoading: loadingRequests, error: requestsError } = useGetAllRequests();
+  const { data: analytics, isLoading: loadingAnalytics, error: analyticsError } = useGetAnalytics();
   const deleteUserMutation = useDeleteUser();
   const deleteRequestMutation = useDeleteRequest();
 
@@ -23,8 +24,8 @@ export default function AdminDashboardPage() {
     try {
       await deleteUserMutation.mutateAsync(principal as any);
       toast.success('User deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete user');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete user');
     }
   };
 
@@ -34,10 +35,20 @@ export default function AdminDashboardPage() {
     try {
       await deleteRequestMutation.mutateAsync(requestId);
       toast.success('Request deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete request');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete request');
     }
   };
+
+  // Check for authorization errors
+  const hasAuthError = 
+    (usersError && String(usersError).includes('permission')) ||
+    (requestsError && String(requestsError).includes('permission')) ||
+    (analyticsError && String(analyticsError).includes('permission'));
+
+  if (hasAuthError) {
+    return <AccessDeniedScreen />;
+  }
 
   if (loadingUsers || loadingRequests || loadingAnalytics) {
     return (
@@ -45,6 +56,25 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
+      </div>
+    );
+  }
+
+  // Show error state if queries failed
+  if (usersError || requestsError || analyticsError) {
+    return (
+      <div className="container py-12">
+        <Card className="border-destructive">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              <CardTitle>Error Loading Admin Dashboard</CardTitle>
+            </div>
+            <CardDescription>
+              There was an error loading the admin dashboard data. Please try refreshing the page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }

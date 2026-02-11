@@ -15,8 +15,8 @@ import FloatingShapes from '../components/animation/FloatingShapes';
 import { getHelpRequestErrorMessage } from '../utils/helpRequestErrors';
 import { UserRole } from '../backend';
 
-export default function StudentRequestHelpPage() {
-  usePageTitle('Request Help');
+export default function WorkRequestPage() {
+  usePageTitle('Submit Work Request');
   const createRequestMutation = useCreateRequest();
   const { userProfile, isAuthenticated, isProfileReady } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -30,14 +30,16 @@ export default function StudentRequestHelpPage() {
   });
 
   const canSubmitRequest = isAuthenticated && isProfileReady && 
-    (userProfile?.role === UserRole.student || userProfile?.role === UserRole.business);
+    (userProfile?.role === UserRole.student || 
+     userProfile?.role === UserRole.business || 
+     userProfile?.role === UserRole.helper);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check authentication
     if (!isAuthenticated) {
-      toast.error('Please log in to submit a help request.');
+      toast.error('Please log in to submit a work request.');
       return;
     }
 
@@ -49,7 +51,7 @@ export default function StudentRequestHelpPage() {
 
     // Check role permission
     if (!canSubmitRequest) {
-      toast.error('You do not have permission to submit help requests. Only students and businesses can create requests.');
+      toast.error('You do not have permission to submit work requests.');
       return;
     }
 
@@ -95,9 +97,13 @@ export default function StudentRequestHelpPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 animate-gradient" />
         <div className="container relative z-10">
           <RequestSuccessBanner
-            title="Request Submitted Successfully!"
-            description="Your request has been submitted and is now visible to helpers."
-            dashboardPath="/dashboard/student"
+            title="Work Request Submitted Successfully!"
+            description="Your request has been submitted and the owner will be notified via Telegram."
+            dashboardPath={
+              userProfile?.role === UserRole.student 
+                ? '/dashboard/student' 
+                : '/dashboard/helper'
+            }
           />
         </div>
       </div>
@@ -114,11 +120,11 @@ export default function StudentRequestHelpPage() {
           <CardHeader className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mx-auto">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Get Help</span>
+              <span className="text-sm font-medium text-primary">Submit Request</span>
             </div>
-            <CardTitle className="text-3xl font-bold">Request Help</CardTitle>
+            <CardTitle className="text-3xl font-bold">Submit Work Request</CardTitle>
             <CardDescription className="text-base">
-              Describe what you need help with and connect with experienced helpers
+              Describe what you need help with and the owner will be notified
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -207,7 +213,7 @@ export default function StudentRequestHelpPage() {
                     </>
                   ) : (
                     <>
-                      <Send className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <Send className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       Submit Request
                     </>
                   )}

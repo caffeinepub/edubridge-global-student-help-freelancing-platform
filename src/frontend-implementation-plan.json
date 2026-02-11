@@ -1,6 +1,171 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Premium SaaS UI upgrade request (already implemented by existing features)",
-  "requirements": []
+  "title": "Owner vs User areas, owner inbox/chat, and Telegram config UI for work requests (frontend-only)",
+  "requirements": [
+    {
+      "id": "REQ-31",
+      "summary": "Add clearly separated Owner (/owner) and User Work Request (/work-request) areas with role-based access and obvious navigation.",
+      "acceptanceCriteria": [
+        "Navigating to the Owner route requires Admin access; non-admin users see an Access Denied experience.",
+        "Navigating to the User Work Request route is possible for authenticated non-admin users.",
+        "Navigation/UI makes it obvious which area is for Users vs Owner (user-facing text remains in English)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/routes/ProtectedRoute.tsx",
+          "operation": "modify",
+          "description": "Extend route-guarding to support an authenticated 'non-admin only' mode (e.g., a prop that denies UserRole.admin) while keeping existing Admin checks. Use the authorization component’s role-based access control patterns; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register new routes: /owner (admin-only) and /work-request (authenticated non-admin-only). Keep existing routes working by redirecting /request-help (and legacy /student-request-help) to /work-request, and redirect /dashboard/admin to /owner to make the Owner entry point primary. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Update header/mobile navigation labels and destinations to clearly separate 'Owner Console' (admin) from 'Work Request' (non-admin). Ensure links point to /owner and /work-request respectively and remain English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/WorkRequestPage.tsx",
+          "operation": "create",
+          "description": "Create a dedicated User Work Request page component for /work-request (can reuse the existing request form UI/logic but with updated permissions per REQ-32). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "operation": "create",
+          "description": "Create the Owner Console page used by /owner, serving as the admin-only entry point and container for Inbox/Requests/Users/Analytics/Twitter (Telegram) sections per REQ-36. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "summary": "Update frontend request-submission gating and messaging so authenticated non-admin users (helper/student/business) can submit work requests; align error copy with the new rule.",
+      "acceptanceCriteria": [
+        "A logged-in user with role helper/student/business can submit a request successfully (no permission toast/trap).",
+        "Frontend no longer shows the old restriction text when the user is allowed; if a user is blocked, the message explains the actual rule in English.",
+        "Backend createRequest (or the new work-request API if introduced) enforces the same permission rule as the frontend."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/StudentRequestHelpPage.tsx",
+          "operation": "modify",
+          "description": "Adjust client-side permission checks and toast messages to allow helper/student/business roles (authenticated, profile-ready) to submit requests; remove the old 'Only students and businesses...' restriction text where no longer applicable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/FreelancingHelpPage.tsx",
+          "operation": "modify",
+          "description": "Align permission checks and user-facing error messages with the new rule (helper/student/business allowed) and ensure blocked users see an accurate English explanation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/WorkRequestPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the new /work-request page applies the updated rule consistently and does not display legacy restriction text. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/helpRequestErrors.ts",
+          "operation": "modify",
+          "description": "Update backend error-to-message mapping to remove the legacy 'Only students and businesses...' wording and replace it with the new rule; keep English messaging and handle generic authorization traps gracefully. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "summary": "Implement an Owner Inbox in the Owner/Admin area showing all requests and a per-request detail view that includes the embedded chat thread.",
+      "acceptanceCriteria": [
+        "When logged in as Admin, the Owner can see a list of all requests and open any request to view its details and chat thread.",
+        "Non-admin users cannot access the Owner Inbox route(s) even if they guess the URL."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire Owner Inbox routes under /owner (e.g., /owner/inbox and /owner/inbox/$requestId) guarded with admin-only access. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/owner/OwnerInboxPage.tsx",
+          "operation": "create",
+          "description": "Create an Owner Inbox page that lists all submitted requests (using existing admin request querying) and links into a detail view. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "operation": "create",
+          "description": "Create a per-request detail page for the Owner to view request fields and the embedded chat thread. Use the existing ChatPanel component to provide the polling-based in-website chat experience; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "operation": "modify",
+          "description": "Add an 'Inbox' entry point in the Owner Console IA and ensure it prioritizes opening request details + chat. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "summary": "Surface an admin-only UI state in the Owner Console for Telegram notifications configuration and health (configured/not configured/failure messaging) without blocking request creation.",
+      "acceptanceCriteria": [
+        "On successful request creation, the backend attempts to send a Telegram message containing the request title + description + requester principal (or display name if available) + request id.",
+        "If Telegram credentials are not configured, request creation still succeeds, and the Owner UI shows an admin-only warning that Telegram is not configured.",
+        "If Telegram sending fails, the failure is captured in logs/returned status (as appropriate) and does not prevent storing the request in the canister; the Owner UI indicates the failure in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useAdmin.ts",
+          "operation": "modify",
+          "description": "Add admin-only React Query hooks to fetch Telegram configuration status and to set Telegram bot credentials using existing backend functions. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "operation": "modify",
+          "description": "Add a dedicated Telegram section/card in the Owner Console that (admin-only) shows whether Telegram notifications are configured and provides a way to save bot token/chat id. Display clear English warnings when not configured, and show any reported failure state if exposed by the backend status. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useRequests.ts",
+          "operation": "modify",
+          "description": "Update request creation to pass the required telegramChannelUrl argument (use https://t.me/techcrunchz as the default value to match the requested channel) while keeping request creation success independent of Telegram status. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/StudentRequestHelpPage.tsx",
+          "operation": "modify",
+          "description": "Ensure request submission still succeeds even if Telegram is not configured; if the backend returns a Telegram-related non-fatal status in the response flow (if introduced), present it as an English informational toast rather than blocking. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/WorkRequestPage.tsx",
+          "operation": "modify",
+          "description": "Ensure request submission passes the telegram channel URL consistently (via hooks) and remains user-friendly even when Telegram is not configured. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "summary": "Redesign the admin dashboard experience into an Owner Console with Owner-focused IA/copy (Inbox, Requests, Users, Analytics) while keeping admin protections.",
+      "acceptanceCriteria": [
+        "Admin page title and headings reflect an Owner-focused console (English UI text).",
+        "Owner Console prioritizes Inbox/Requests and chat entry points; existing admin capabilities (users/requests/analytics) remain available unless explicitly removed.",
+        "Non-admin users are still blocked from all admin/owner UI routes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/owner/OwnerConsolePage.tsx",
+          "operation": "modify",
+          "description": "Implement the Owner Console information architecture (Inbox, Requests, Users, Analytics) and make Inbox/Request chat entry points prominent; reuse existing admin hooks/components where appropriate. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/dashboards/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Update copy/headings to be Owner-focused (e.g., 'Owner Console') and/or convert this page into a thin wrapper that redirects or delegates to the new Owner Console while preserving any existing admin capabilities. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Replace 'Admin Dashboard' navigation label with 'Owner Console' for admins and ensure non-admin users do not see admin/owner links. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Ensure /owner is the primary admin-only experience and that /dashboard/admin continues to be admin-only (either via redirect to /owner or by rendering the Owner Console). Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
 }

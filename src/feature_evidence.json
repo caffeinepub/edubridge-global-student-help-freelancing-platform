@@ -1,4 +1,118 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-create-clearly-separated-entry-points-areas-for-regular-users-vs-the-single-site-owner-admin-add-a-dedicated-owner-area-route-e-g-owner-or-dashboard-owner-that-is-only-accessible-to-the-admin-role-and-add-a-dedicated-user-work-request-route-e-g-work-request-that-is-accessible-to-authenticated-non-admin-users",
+      "featureTitle": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/pages/WorkRequestPage.tsx",
+        "frontend/src/pages/owner/OwnerConsolePage.tsx",
+        "frontend/src/routes/ProtectedRoute.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-31"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-request-submission-permissions-so-that-authenticated-non-admin-users-can-submit-work-requests-without-being-blocked-by-the-current-only-students-and-businesses-can-create-requests-restriction-as-shown-in-the-provided-screenshot-ensure-the-backend-authorization-and-frontend-gating-messages-match-the-new-rule",
+      "featureTitle": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+      "files": [
+        "frontend/src/pages/WorkRequestPage.tsx",
+        "frontend/src/utils/helpRequestErrors.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-32"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-an-owner-inbox-inside-the-owner-admin-session-that-shows-all-submitted-work-requests-from-all-users-and-provides-a-per-request-detail-view-with-access-to-the-embedded-in-website-chat-thread-for-that-request",
+      "featureTitle": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/owner/OwnerConsolePage.tsx",
+        "frontend/src/pages/owner/OwnerInboxPage.tsx",
+        "frontend/src/pages/owner/OwnerRequestDetailPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-33"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-send-a-telegram-notification-for-every-newly-submitted-work-request-to-the-telegram-channel-url-provided-by-the-user-https-t-me-techcrunchz-add-a-secure-configuration-mechanism-for-the-required-telegram-bot-credentials-e-g-bot-token-and-target-chat-channel-id-and-surface-a-clear-admin-only-ui-state-indicating-whether-telegram-notifications-are-configured-and-working",
+      "featureTitle": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+      "files": [
+        "frontend/src/hooks/useAdmin.ts",
+        "frontend/src/hooks/useRequests.ts",
+        "frontend/src/pages/WorkRequestPage.tsx",
+        "frontend/src/pages/owner/OwnerConsolePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-35"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-admin-owner-dashboard-fully-customized-for-the-single-business-owner-by-redesigning-the-admin-dashboard-ia-and-copy-to-reflect-an-owner-console-owner-inbox-requests-users-analytics-while-keeping-admin-only-protections-intact",
+      "featureTitle": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/pages/owner/OwnerConsolePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-36"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

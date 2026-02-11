@@ -1,15 +1,18 @@
 import Text "mo:core/Text";
 import Principal "mo:core/Principal";
-import MixinAuthorization "authorization/MixinAuthorization";
-import AccessControl "authorization/access-control";
-import Map "mo:core/Map";
 import List "mo:core/List";
 import Array "mo:core/Array";
-import Runtime "mo:core/Runtime";
-import Time "mo:core/Time";
-import Iter "mo:core/Iter";
+import Map "mo:core/Map";
 import Order "mo:core/Order";
+import Iter "mo:core/Iter";
+import Time "mo:core/Time";
+import Runtime "mo:core/Runtime";
+import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
+import Outcall "http-outcalls/outcall";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // === User Profiles ===
 
@@ -45,11 +48,64 @@ actor {
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+  // === Initialization Guard ===
+  // Only the canister creator can call this once
+  var initializationCompleted = false;
+  public shared ({ caller }) func completeInitialization() : async () {
+    if (not initializationCompleted) {
+      initializationCompleted := true;
     };
+  };
+
+  // === Single Owner Enforcement ===
+  // Track if an admin/owner has been created
+  var ownerPrincipal : ?Principal = null;
+
+  func hasOwner() : Bool {
+    switch (ownerPrincipal) {
+      case (null) { false };
+      case (?_) { true };
+    };
+  };
+
+  func isOwner(user : Principal) : Bool {
+    switch (ownerPrincipal) {
+      case (null) { false };
+      case (?owner) { owner == user };
+    };
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      return "Unauthorized: Only users can save profiles";
+    };
+
+    // Enforce single owner rule
+    switch (profile.role) {
+      case (#admin) {
+        if (hasOwner() and not isOwner(caller)) {
+          return "Unauthorized: Only one admin/owner is allowed. The business owner has already been set.";
+        };
+        if (not hasOwner()) {
+          ownerPrincipal := ?caller;
+        };
+      };
+      case (_) {};
+    };
+
     userProfiles.add(caller, profile);
+
+    // Sync role to AccessControl system
+    switch (profile.role) {
+      case (#admin) {
+        AccessControl.assignRole(accessControlState, caller, caller, #admin);
+      };
+      case (_) {
+        // All other roles are regular users
+        AccessControl.assignRole(accessControlState, caller, caller, #user);
+      };
+    };
+    "Profile saved successfully";
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -63,7 +119,10 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view profiles");
     };
-    // Allow users to view other users' profiles for collaboration
+    // Allow users to view their own profile or admins to view any profile
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
     userProfiles.get(user);
   };
 
@@ -84,6 +143,13 @@ actor {
   func isHelper(user : Principal) : Bool {
     switch (getUserRole(user)) {
       case (?#helper) { true };
+      case (_) { false };
+    };
+  };
+
+  func isBusiness(user : Principal) : Bool {
+    switch (getUserRole(user)) {
+      case (?#business) { true };
       case (_) { false };
     };
   };
@@ -140,13 +206,73 @@ actor {
 
   var nextRequestId = 1;
 
-  public shared ({ caller }) func createRequest(title : Text, description : Text, location : ?Location) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create requests");
-    };
+  // === Telegram Configuration ===
+  type TelegramConfig = {
+    botToken : Text;
+    chatId : Text;
+  };
 
-    if (not isStudent(caller)) {
-      Runtime.trap("Unauthorized: Only students can create help requests");
+  var telegramConfig : ?TelegramConfig = null;
+
+  public shared ({ caller }) func setTelegramConfig(botToken : Text, chatId : Text) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only the owner can configure Telegram notifications");
+    };
+    telegramConfig := ?{
+      botToken;
+      chatId;
+    };
+  };
+
+  public query ({ caller }) func getTelegramConfigStatus() : async {
+    isConfigured : Bool;
+    chatId : ?Text;
+  } {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only the owner can view Telegram configuration status");
+    };
+    switch (telegramConfig) {
+      case (null) {
+        { isConfigured = false; chatId = null };
+      };
+      case (?config) {
+        { isConfigured = true; chatId = ?config.chatId };
+      };
+    };
+  };
+
+  public query ({ caller }) func transform(input : Outcall.TransformationInput) : async Outcall.TransformationOutput {
+    Outcall.transform(input);
+  };
+
+  func postTelegramNotification(message : Text) : async () {
+    switch (telegramConfig) {
+      case (null) {
+        // Silently skip if not configured
+        return;
+      };
+      case (?config) {
+        let url = "https://api.telegram.org/bot" # config.botToken # "/sendMessage";
+
+        let body = "{\"chat_id\": \"" # config.chatId # "\"," #
+          "\"text\": \"" # message # "\"}";
+
+        try {
+          ignore await Outcall.httpPostRequest(url, [], body, transform);
+        } catch (_) {};
+      };
+    };
+  };
+
+  public shared ({ caller }) func createRequest(
+    title : Text,
+    description : Text,
+    location : ?Location,
+    telegramChannelUrl : Text,
+  ) : async Nat {
+    // Allow any authenticated user to create requests
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can create requests");
     };
 
     let newRequest : RequestWithTextTasks = {
@@ -162,6 +288,16 @@ actor {
     };
 
     requests.add(nextRequestId, newRequest);
+
+    // Send Telegram notification
+    let telegramMessage = "New work request submitted: " # title # " - " # description # " Location: " # (
+      switch (location) {
+        case (?loc) { loc.city # ", " # loc.address };
+        case (null) { "N/A" };
+      }
+    ) # "\nCheck the channel: " # telegramChannelUrl;
+    await postTelegramNotification(telegramMessage);
+
     nextRequestId += 1;
     newRequest.id;
   };
@@ -186,13 +322,9 @@ actor {
       ).sort();
     };
 
-    if (isStudent(caller)) {
-      return requests.values().toArray().filter(
-        func(req) { req.owner == caller }
-      ).sort();
-    };
-
-    [];
+    requests.values().toArray().filter(
+      func(req) { req.owner == caller }
+    ).sort();
   };
 
   public query ({ caller }) func getRequestsByStatus(status : RequestStatus) : async [RequestWithTextTasks] {
@@ -219,22 +351,14 @@ actor {
       );
     };
 
-    if (isStudent(caller)) {
-      return filtered.filter(
-        func(req) { req.owner == caller }
-      );
-    };
-
-    [];
+    filtered.filter(
+      func(req) { req.owner == caller }
+    );
   };
 
   public query ({ caller }) func getMyRequests() : async [RequestWithTextTasks] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view requests");
-    };
-
-    if (not isStudent(caller)) {
-      Runtime.trap("Unauthorized: Only students can view their requests");
     };
 
     requests.values().toArray().filter(
@@ -344,9 +468,6 @@ actor {
         if (caller != request.owner) {
           Runtime.trap("Unauthorized: Only the request owner can add tasks");
         };
-        if (not isStudent(caller)) {
-          Runtime.trap("Unauthorized: Only students can add tasks to their requests");
-        };
         let updatedTasks = request.tasks.concat([task]);
         let updatedRequest = {
           request with tasks = updatedTasks;
@@ -380,10 +501,6 @@ actor {
   public shared ({ caller }) func addRating(requestId : Nat, helperUser : Principal, score : Nat, comment : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can add ratings");
-    };
-
-    if (not isStudent(caller)) {
-      Runtime.trap("Unauthorized: Only students can rate helpers");
     };
 
     switch (requests.get(requestId)) {
@@ -430,8 +547,13 @@ actor {
       Runtime.trap("Unauthorized: Only users can view ratings");
     };
 
+    // Only allow viewing ratings for yourself (as helper or student) or if admin
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own ratings");
+    };
+
     ratings.toArray().filter(
-      func(rating) { rating.helperUserId == user }
+      func(rating) { rating.helperUserId == user or rating.studentUserId == user }
     );
   };
 
@@ -480,13 +602,9 @@ actor {
       );
     };
 
-    if (isStudent(caller)) {
-      return filtered.filter(
-        func(req) { req.owner == caller }
-      );
-    };
-
-    [];
+    filtered.filter(
+      func(req) { req.owner == caller }
+    );
   };
 
   public query ({ caller }) func getPendingRequestsForUser(user : Principal) : async [RequestWithTextTasks] {
@@ -540,9 +658,11 @@ actor {
           case (?helper) { helper == caller };
           case (null) { false };
         };
+        let isAdmin = AccessControl.isAdmin(accessControlState, caller);
 
-        if (not (isOwner or isAssignedHelper)) {
-          Runtime.trap("Unauthorized: Only the student or assigned helper can send messages");
+        // Admin can participate in any chat thread
+        if (not (isOwner or isAssignedHelper or isAdmin)) {
+          Runtime.trap("Unauthorized: Only the request owner, assigned helper, or admin can send messages");
         };
 
         let newMessage : Message = {
@@ -576,8 +696,9 @@ actor {
         };
         let isAdmin = AccessControl.isAdmin(accessControlState, caller);
 
+        // Admin can read any chat thread
         if (not (isOwner or isAssignedHelper or isAdmin)) {
-          Runtime.trap("Unauthorized: Only the student, assigned helper, or admin can view messages");
+          Runtime.trap("Unauthorized: Only the request owner, assigned helper, or admin can view messages");
         };
 
         messages.values().toArray().filter(
@@ -607,9 +728,11 @@ actor {
               case (?helper) { helper == caller };
               case (null) { false };
             };
+            let isAdmin = AccessControl.isAdmin(accessControlState, caller);
 
-            if (not (isOwner or isAssignedHelper)) {
-              Runtime.trap("Unauthorized: Only the student or assigned helper can mark messages as read");
+            // Admin can mark messages as read in any chat thread
+            if (not (isOwner or isAssignedHelper or isAdmin)) {
+              Runtime.trap("Unauthorized: Only the request owner, assigned helper, or admin can mark messages as read");
             };
 
             let updatedMessage = {
@@ -635,9 +758,11 @@ actor {
           case (?helper) { helper == caller };
           case (null) { false };
         };
+        let isAdmin = AccessControl.isAdmin(accessControlState, caller);
 
-        if (not (isOwner or isAssignedHelper)) {
-          Runtime.trap("Unauthorized: Only the student or assigned helper can view unread count");
+        // Admin can view unread count for any chat thread
+        if (not (isOwner or isAssignedHelper or isAdmin)) {
+          Runtime.trap("Unauthorized: Only the request owner, assigned helper, or admin can view unread count");
         };
 
         let unreadMessages = messages.values().toArray().filter(
@@ -664,6 +789,11 @@ actor {
   public shared ({ caller }) func deleteUser(user : Principal) : async () {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can delete users");
+    };
+
+    // Prevent deleting the owner
+    if (isOwner(user)) {
+      Runtime.trap("Cannot delete the business owner account");
     };
 
     userProfiles.remove(user);
