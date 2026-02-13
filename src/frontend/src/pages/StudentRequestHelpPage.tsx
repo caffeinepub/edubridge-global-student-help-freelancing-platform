@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Send, MapPin, Sparkles } from 'lucide-react';
 import FloatingShapes from '../components/animation/FloatingShapes';
 import { getHelpRequestErrorMessage } from '../utils/helpRequestErrors';
-import { UserRole } from '../backend';
+import { UserRole, SubmissionMode } from '../backend';
 
 export default function StudentRequestHelpPage() {
   usePageTitle('Request Help');
@@ -68,10 +68,13 @@ export default function StudentRequestHelpPage() {
         ? { city: formData.city, address: formData.address }
         : null;
 
+      const mode = formData.isOffline ? SubmissionMode.offline : SubmissionMode.online;
+
       await createRequestMutation.mutateAsync({
         title: formData.title,
         description: formData.description,
         location,
+        submissionMode: mode,
       });
 
       setShowSuccess(true);

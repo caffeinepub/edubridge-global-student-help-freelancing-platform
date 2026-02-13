@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-clearly-separated-entry-points-areas-for-regular-users-vs-the-single-site-owner-admin-add-a-dedicated-owner-area-route-e-g-owner-or-dashboard-owner-that-is-only-accessible-to-the-admin-role-and-add-a-dedicated-user-work-request-route-e-g-work-request-that-is-accessible-to-authenticated-non-admin-users",
-      "featureTitle": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+      "featureId": "feature-add-a-new-user-role-named-client-across-the-app-so-users-can-register-and-be-treated-distinctly-from-students-businesses-and-freelancers-helpers",
+      "featureTitle": "Add a new user role named \"client\" across the app, so users can register and be treated distinctly from students, businesses, and freelancers/helpers.",
       "files": [
-        "frontend/src/App.tsx",
         "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/pages/WorkRequestPage.tsx",
-        "frontend/src/pages/owner/OwnerConsolePage.tsx",
+        "frontend/src/hooks/useAuth.ts",
         "frontend/src/routes/ProtectedRoute.tsx"
       ],
       "components": [
@@ -21,14 +19,57 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-31"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-request-submission-permissions-so-that-authenticated-non-admin-users-can-submit-work-requests-without-being-blocked-by-the-current-only-students-and-businesses-can-create-requests-restriction-as-shown-in-the-provided-screenshot-ensure-the-backend-authorization-and-frontend-gating-messages-match-the-new-rule",
-      "featureTitle": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+      "featureId": "feature-update-the-landing-experience-to-include-a-clear-entry-selection-section-with-exactly-three-prominent-options-student-client-and-business-using-appealing-transition-style-typography-animation-consistent-with-the-current-site-style-do-not-redesign-the-overall-theme",
+      "featureTitle": "Update the landing (\"/\") experience to include a clear entry selection section with exactly three prominent options: \"Student\", \"Client\", and \"Business\", using appealing transition-style typography/animation consistent with the current site style (do not redesign the overall theme).",
       "files": [
+        "frontend/src/pages/LandingPage.tsx",
+        "frontend/src/utils/urlParams.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-create-account-flow-to-support-the-new-client-role-and-keep-existing-roles-working-ensure-all-user-facing-role-labels-are-in-english-and-consistent-student-client-business-and-existing-freelancer-helper-if-still-supported",
+      "featureTitle": "Update the Create Account flow to support the new \"Client\" role and keep existing roles working; ensure all user-facing role labels are in English and consistent (Student, Client, Business, and existing Freelancer/Helper if still supported).",
+      "files": [
+        "frontend/src/hooks/useAuth.ts",
+        "frontend/src/pages/CreateAccountPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-upgrade-the-authenticated-request-submission-form-currently-routed-at-work-request-to-capture-and-submit-for-student-client-business-name-age-title-and-description-with-role-specific-helper-text-examples-matching-the-user-request",
+      "featureTitle": "Upgrade the authenticated request submission form (currently routed at \"/work-request\") to capture and submit, for Student/Client/Business: Name, Age, Title, and Description (with role-specific helper text/examples matching the user request).",
+      "files": [
+        "frontend/src/hooks/useRequests.ts",
         "frontend/src/pages/WorkRequestPage.tsx",
         "frontend/src/utils/helpRequestErrors.ts"
       ],
@@ -42,16 +83,35 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-32"
+        "REQ-4"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-an-owner-inbox-inside-the-owner-admin-session-that-shows-all-submitted-work-requests-from-all-users-and-provides-a-per-request-detail-view-with-access-to-the-embedded-in-website-chat-thread-for-that-request",
-      "featureTitle": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+      "featureId": "feature-add-submission-mode-options-online-and-offline-to-the-request-form-for-student-client-business-if-offline-is-selected-show-an-on-screen-notification-containing-exactly-meet-at-moon-bake-kengeri-satellite-town-bangalore-560060-and-ensure-the-submitted-request-is-marked-stored-as-offline-with-that-location-information",
+      "featureTitle": "Add submission mode options \"Online\" and \"Offline\" to the request form for Student/Client/Business. If \"Offline\" is selected, show an on-screen notification containing exactly: \"Meet at Moon Bake, Kengeri Satellite Town, Bangalore 560060.\" and ensure the submitted request is marked/stored as offline with that location information.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/owner/OwnerConsolePage.tsx",
+        "frontend/src/hooks/useRequests.ts",
+        "frontend/src/pages/WorkRequestPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-that-after-student-client-business-submit-a-request-it-is-visible-to-the-owner-admin-for-review-in-the-existing-owner-inbox-and-detail-pages-and-the-owner-can-accept-or-reject-it-and-initiate-conversation-with-the-user",
+      "featureTitle": "Ensure that after Student/Client/Business submit a request, it is visible to the owner/admin for review in the existing owner inbox and detail pages, and the owner can accept or reject it and initiate conversation with the user.",
+      "files": [
         "frontend/src/pages/owner/OwnerInboxPage.tsx",
         "frontend/src/pages/owner/OwnerRequestDetailPage.tsx"
       ],
@@ -65,18 +125,17 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-33"
+        "REQ-6"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-send-a-telegram-notification-for-every-newly-submitted-work-request-to-the-telegram-channel-url-provided-by-the-user-https-t-me-techcrunchz-add-a-secure-configuration-mechanism-for-the-required-telegram-bot-credentials-e-g-bot-token-and-target-chat-channel-id-and-surface-a-clear-admin-only-ui-state-indicating-whether-telegram-notifications-are-configured-and-working",
-      "featureTitle": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+      "featureId": "feature-implement-acceptance-rejection-notifications-to-the-submitting-user-when-the-owner-admin-accepts-a-request-the-user-receives-a-confirmation-message-when-rejected-the-user-receives-a-rejection-message-encouraging-them-to-try-again-notifications-must-be-in-english-and-delivered-within-the-app-e-g-as-an-automatic-chat-system-message-tied-to-the-request-and-or-a-status-banner-in-the-user-dashboard",
+      "featureTitle": "Implement acceptance/rejection notifications to the submitting user: when the owner/admin accepts a request, the user receives a confirmation message; when rejected, the user receives a rejection message encouraging them to try again. Notifications must be in English and delivered within the app (e.g., as an automatic chat/system message tied to the request, and/or a status banner in the user dashboard).",
       "files": [
-        "frontend/src/hooks/useAdmin.ts",
-        "frontend/src/hooks/useRequests.ts",
-        "frontend/src/pages/WorkRequestPage.tsx",
-        "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        "frontend/src/hooks/useChat.ts",
+        "frontend/src/pages/dashboards/StudentDashboardPage.tsx",
+        "frontend/src/pages/owner/OwnerRequestDetailPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -88,17 +147,16 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-35"
+        "REQ-7"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-admin-owner-dashboard-fully-customized-for-the-single-business-owner-by-redesigning-the-admin-dashboard-ia-and-copy-to-reflect-an-owner-console-owner-inbox-requests-users-analytics-while-keeping-admin-only-protections-intact",
-      "featureTitle": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+      "featureId": "feature-preserve-the-existing-website-look-and-feel-while-implementing-the-above-changes-do-not-introduce-a-new-theme-if-any-new-ui-elements-are-added-entry-selection-new-fields-online-offline-controls-they-must-reuse-the-existing-glass-gradient-animation-patterns-already-present-in-the-app-for-a-consistent-experience-across-devices",
+      "featureTitle": "Preserve the existing website look-and-feel while implementing the above changes; do not introduce a new theme. If any new UI elements are added (entry selection, new fields, online/offline controls), they must reuse the existing glass/gradient/animation patterns already present in the app for a consistent experience across devices.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/pages/owner/OwnerConsolePage.tsx"
+        "frontend/src/pages/LandingPage.tsx",
+        "frontend/src/pages/WorkRequestPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -110,7 +168,27 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-36"
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-a-comprehensive-implementation-guide-design-specification-inside-the-repo-that-documents-roles-student-client-business-helper-admin-the-entry-selection-flow-all-form-fields-submission-mode-behavior-online-offline-moon-bake-notice-and-the-accept-reject-notification-behavior-including-exact-user-facing-message-copy",
+      "featureTitle": "Provide a comprehensive implementation guide/design specification inside the repo that documents: roles (Student/Client/Business/Helper/Admin), the entry-selection flow, all form fields, submission-mode behavior (Online/Offline + Moon Bake notice), and the accept/reject notification behavior (including exact user-facing message copy).",
+      "files": [
+        "frontend/docs/edubridge-roles-requests-and-notifications.md"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
       ],
       "confidence": "high"
     }

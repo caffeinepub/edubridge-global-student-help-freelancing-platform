@@ -58,6 +58,5 @@ export function useGetUnreadMessageCount(requestId: bigint | null) {
       return actor.getUnreadMessageCount(requestId);
     },
     enabled: !!actor && !actorFetching && requestId !== null,
-    refetchInterval: 5000,
   });
 }

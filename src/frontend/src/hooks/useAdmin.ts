@@ -135,6 +135,53 @@ export function useDeleteRequest() {
   });
 }
 
+// Admin-only moderation mutations
+export function useApproveRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (requestId: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      try {
+        return await actor.approveRequest(requestId);
+      } catch (error: any) {
+        if (error.message?.includes('Unauthorized')) {
+          throw new Error('Only the admin can approve requests');
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['requestsByStatus'] });
+    },
+  });
+}
+
+export function useRejectRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (requestId: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      try {
+        return await actor.rejectRequest(requestId);
+      } catch (error: any) {
+        if (error.message?.includes('Unauthorized')) {
+          throw new Error('Only the admin can reject requests');
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['requestsByStatus'] });
+    },
+  });
+}
+
 // Telegram configuration hooks
 export function useGetTelegramConfigStatus() {
   const { actor, isFetching: actorFetching } = useActor();

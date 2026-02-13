@@ -35,6 +35,9 @@ export function useAuth() {
       case UserRole.business:
         navigate({ to: '/dashboard/helper' });
         break;
+      case UserRole.client:
+        navigate({ to: '/work-request' });
+        break;
     }
   };
 
@@ -42,6 +45,7 @@ export function useAuth() {
   const isHelper = userProfile?.role === UserRole.helper;
   const isBusiness = userProfile?.role === UserRole.business;
   const isAdmin = userProfile?.role === UserRole.admin;
+  const isClient = userProfile?.role === UserRole.client;
 
   return {
     identity,
@@ -58,5 +62,6 @@ export function useAuth() {
     isHelper,
     isBusiness,
     isAdmin,
+    isClient,
   };
 }

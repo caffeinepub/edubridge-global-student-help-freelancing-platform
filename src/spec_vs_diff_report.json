@@ -1,56 +1,108 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T14:25:10.098Z",
-  "summary": "Diff implements new separated Owner vs User routes and navigation, adds Owner Console/Inbox/detail pages with embedded chat panel, updates user request submission UI gating, and introduces UI for Telegram configuration plus backend state migration scaffolding for owner/telegram config. However, key backend behaviors for admin chat authorization, Telegram sending/config APIs, and owner-only admin-operation enforcement are not evidenced in the provided diff summary (backend/main.mo is truncated).",
+  "generatedAt": "2026-02-12T18:45:39.227Z",
+  "summary": "Diff adds a new #client role end-to-end (backend + frontend), introduces landing-page role preselection via sessionStorage, adds submissionMode plumbing for requests (online/offline) including a migration for stable state, updates /work-request UI to collect name/age and offline location inputs, and adds a user-facing accept/reject status banner (seen in Student dashboard). However, several acceptance criteria are not evidenced as implemented: name/age are not persisted to backend requests, the exact offline meeting notice copy is not shown as required, and owner/admin views cannot display name/age because request data types/hooks still only send title/description/location/submissionMode. Also, in-app accept/reject notifications for non-student submitters (client/business) are not evidenced.",
   "missing_requirements": [
     {
-      "id": "REQ-34",
-      "requirement": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
-      "reason": "No evidence in the diff summary that backend chat/message read/unread authorization checks were updated to allow admin access across all request threads. The only shown backend changes are around profile saving and ownerPrincipal tracking; chat logic is not shown in the truncated backend/main.mo excerpt.",
+      "id": "REQ-2",
+      "requirement": "Landing page entry selection section with exactly three prominent options (Student, Client, Business) using transition/animated typography, routing into the correct next step without breaking Create Account / Login.",
+      "reason": "The LandingPage.tsx snippet shows role-selection handling (storeSessionParameter + navigate to /create-account), but the diff excerpt is truncated before any UI showing the three selectable options; cannot verify the section exists, that it is exactly three options, or that it uses the requested transition-style typography/animation.",
       "evidence": [
-        "backend/main.mo (truncated)"
+        "frontend/src/pages/LandingPage.tsx (truncated)"
       ]
     },
     {
-      "id": "REQ-35",
-      "requirement": "Send a Telegram notification for every newly submitted work request, with secure bot credential configuration persisted in canister state, and reflect configured/working status in admin-only UI.",
-      "reason": "Frontend UI for Telegram configuration/status is added, and migration adds telegramConfig to state, but the diff summary does not show backend APIs to set/get Telegram config status, nor the backend outcall sending a Telegram message during request creation, nor any handling/logging of send failures as required.",
+      "id": "REQ-4",
+      "requirement": "Work request submission must persist Name and Age in the backend request data (not only localStorage) and capture/submit them for Student/Client/Business.",
+      "reason": "WorkRequestPage collects name/age in local component state, but useCreateRequest only sends title/description/location/submissionMode to actor.createWorkRequest. No evidence in the provided backend diff that request records include name/age or that createWorkRequest accepts/persists them.",
       "evidence": [
-        "backend/migration.mo",
-        "frontend/src/components/owner/TelegramConfigCard.tsx",
-        "frontend/src/pages/owner/OwnerConsolePage.tsx",
+        "frontend/src/pages/WorkRequestPage.tsx",
         "frontend/src/hooks/useRequests.ts",
-        "backend/main.mo (truncated)",
-        "frontend/src/hooks/useAdmin.ts (truncated)"
+        "backend/migration.mo",
+        "backend/main.mo (truncated)"
       ]
     },
     {
-      "id": "REQ-37",
-      "requirement": "Ensure only the single established owner can access owner-only admin operations (owner-only backend operations remain callable only by the owner Admin principal).",
-      "reason": "Single-owner assignment is enforced when saving a caller profile with role #admin, but the diff summary does not show changes to owner-only/admin-only backend methods to restrict access specifically to the established ownerPrincipal (vs any admin).",
+      "id": "REQ-5",
+      "requirement": "If Offline is selected, show on-screen notification containing exactly: \"Meet at Moon Bake, Kengeri Satellite Town, Bangalore 560060.\" and store the request as offline with that location info in backend so owner can see it.",
+      "reason": "No evidence in the WorkRequestPage excerpt of the required verbatim notice being rendered. The repo doc uses different wording (\"Meeting Location: Moon Bake, ...\") and does not match the exact required copy. Also, while migration introduces submissionMode/submissionLocation fields, the create request hook does not pass any fixed Moon Bake string; backend behavior to set/return that exact location is not evidenced in the provided backend excerpt.",
       "evidence": [
+        "frontend/docs/edubridge-roles-requests-and-notifications.md",
+        "frontend/src/pages/WorkRequestPage.tsx (truncated)",
+        "frontend/src/hooks/useRequests.ts",
+        "backend/migration.mo",
         "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Owner Inbox and Owner Request Detail must show new/updated request fields (Name, Age, submission mode/location) and owner can accept/reject and initiate conversation.",
+      "reason": "Owner pages import SubmissionMode and MapPin/Globe icons, suggesting mode/location display, but request data shape shown in hooks only includes title/description/location/submissionMode. There is no evidence name/age exist on RequestWithTextTasks, so owner pages cannot display them. Chat initiation exists (ChatPanel included), but visibility of Name/Age is not evidenced.",
+      "evidence": [
+        "frontend/src/pages/owner/OwnerInboxPage.tsx (truncated)",
+        "frontend/src/pages/owner/OwnerRequestDetailPage.tsx (truncated)",
+        "frontend/src/hooks/useRequests.ts",
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Acceptance/rejection notifications delivered in-app to the submitting user (confirmation on accept; rejection encouraging retry), generated automatically at accept/reject time.",
+      "reason": "A status-based banner message is evidenced only in StudentDashboardPage. There is no evidence of equivalent notification UI for Client users (who are routed to /work-request and explicitly have no dashboard link) or for Business users (helper dashboard). Also no evidence in backend diff excerpt of automatically sending a system/chat message at accept/reject time.",
+      "evidence": [
+        "frontend/src/pages/dashboards/StudentDashboardPage.tsx (truncated)",
+        "frontend/src/hooks/useAuth.ts",
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Implementation guide/spec must include exact English copy for Offline meeting notice and accept/reject messages, matching implemented behavior.",
+      "reason": "The doc’s offline notice text does not match the required exact copy (it uses \"Meeting Location: ...\" instead of \"Meet at Moon Bake, ... 560060.\"). The doc is truncated at the accept/reject notification section, so the exact acceptance/rejection message copy and full behavior cannot be verified from the diff summary.",
+      "evidence": [
+        "frontend/docs/edubridge-roles-requests-and-notifications.md (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [],
+  "hallucinated_features": [
+    {
+      "description": "Automatically opening an external Telegram channel URL after successfully creating a request.",
+      "reason": "Not requested in any REQ; could be considered an unrequested behavior change and a potential UX regression.",
+      "evidence": [
+        "frontend/src/hooks/useRequests.ts"
+      ]
+    },
+    {
+      "description": "Adding a 3-second polling interval for chat message retrieval.",
+      "reason": "Not requested; while it is not WebSocket-based, it is still a behavioral addition not specified in the BuildRequest.",
+      "evidence": [
+        "frontend/src/hooks/useChat.ts"
+      ]
+    }
+  ],
   "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
+    "frontend/docs/edubridge-roles-requests-and-notifications.md",
+    "frontend/src/components/animation/RevealOnScroll.tsx",
     "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/components/owner/TelegramConfigCard.tsx",
-    "frontend/src/hooks/useAdmin.ts",
+    "frontend/src/hooks/useAuth.ts",
+    "frontend/src/hooks/useChat.ts",
     "frontend/src/hooks/useRequests.ts",
+    "frontend/src/pages/CreateAccountPage.tsx",
+    "frontend/src/pages/FreelancingHelpPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/StudentRequestHelpPage.tsx",
     "frontend/src/pages/WorkRequestPage.tsx",
-    "frontend/src/pages/owner/OwnerConsolePage.tsx",
+    "frontend/src/pages/dashboards/StudentDashboardPage.tsx",
     "frontend/src/pages/owner/OwnerInboxPage.tsx",
     "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
     "frontend/src/routes/ProtectedRoute.tsx",
     "frontend/src/utils/helpRequestErrors.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

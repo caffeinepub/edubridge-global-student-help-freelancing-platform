@@ -1,15 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Separate the regular User experience from the single Owner/Admin console, allow authenticated users to submit work requests, and notify the Owner via Telegram and an in-site Owner inbox + chat.
+**Goal:** Add a new “Client” role and upgrade entry selection, request submission, and admin accept/reject messaging while preserving the existing EduBridge look-and-feel.
 
 **Planned changes:**
-- Add clearly separated routes/entry points for Users (e.g., `/work-request`) vs Owner/Admin (e.g., `/owner`), including an Access Denied experience for non-admins attempting owner routes.
-- Update request-submission permissions so any authenticated non-admin user (helper/student/business) can submit work requests; align frontend gating/toasts and backend authorization with the new rule.
-- Implement an Owner Inbox in the Owner/Admin area that lists all work requests, includes a per-request details view, and provides access to the embedded website chat thread for that request.
-- Extend chat authorization so the Admin/Owner can read/send/mark-read on any request thread, while non-admin users remain limited to permitted threads (request owner / assigned helper).
-- Add Telegram notifications for every newly submitted work request to the provided channel, with secure configuration for bot credentials and an admin-only UI indicator for configured/working vs not configured/failing.
-- Redesign the Admin dashboard information architecture and copy into an Owner-focused console (Inbox, Requests, Users, Analytics) while keeping Admin-only protections intact.
-- Enforce single-owner behavior in the backend: prevent creation/assignment of additional Admin users and restrict owner-only operations to the established owner principal.
+- Add backend + frontend support for a new user role: Client (distinct from Student, Business, and existing Helper/Freelancer).
+- Update the landing page ("/") to include an entry selection section with exactly three prominent options: Student, Client, Business, using transition/animated typography consistent with the current style.
+- Update the Create Account flow to include Client and ensure all role labels are in English and consistent.
+- Upgrade the authenticated work request form ("/work-request") for Student/Client/Business to collect and persist: Name, Age, Title, Description with role-specific helper text/examples.
+- Add Online/Offline submission mode to the request form; when Offline is selected, display the exact meeting notice text and store the submission as offline with that location.
+- Ensure the owner/admin inbox and request detail views display the new request fields (Name, Age, submission mode/location) and that existing accept/reject + chat initiation still work.
+- Add automatic in-app acceptance/rejection notifications for submitters (English copy), generated at the moment an owner/admin accepts or rejects a request.
+- Add a repository documentation/spec file describing roles, entry-selection flow, all request form fields, Online/Offline behavior (including the exact Moon Bake notice), and accept/reject notification behavior (including exact message copy).
 
-**User-visible outcome:** Users can submit work requests from a dedicated user route without the old permission block; the Owner can access an Owner-only console with an inbox and per-request chat, and receives Telegram alerts for new requests (with clear admin-only status if Telegram is not configured or fails).
+**User-visible outcome:** Visitors can choose Student/Client/Business on the landing page, create accounts with the correct role, and (as Student/Client/Business) submit richer online/offline work requests; the owner/admin can review them with the added details, accept/reject them, and users receive automatic in-app confirmation/rejection messages tied to their request.

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGetAvailableRequests, useGetMyAssignedRequests, useAcceptRequest, useCompleteRequest } from '../../hooks/useRequests';
+import { useGetAvailableRequests, useGetMyAssignedRequests } from '../../hooks/useRequests';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RequestsTable from '../../components/requests/RequestsTable';
@@ -8,15 +8,12 @@ import ChatPanel from '../../components/chat/ChatPanel';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { RequestWithTextTasks } from '../../backend';
 import { usePageTitle } from '../../seo/usePageTitle';
-import { toast } from 'sonner';
 import { Briefcase, Search, CheckCircle2 } from 'lucide-react';
 
 export default function HelperDashboardPage() {
   usePageTitle('Helper Dashboard');
   const { data: availableRequests = [], isLoading: loadingAvailable } = useGetAvailableRequests();
   const { data: assignedRequests = [], isLoading: loadingAssigned } = useGetMyAssignedRequests();
-  const acceptRequestMutation = useAcceptRequest();
-  const completeRequestMutation = useCompleteRequest();
 
   const [selectedRequest, setSelectedRequest] = useState<RequestWithTextTasks | null>(null);
   const [showChat, setShowChat] = useState(false);
@@ -39,28 +36,6 @@ export default function HelperDashboardPage() {
 
   const filteredAvailable = filterRequests(availableRequests);
   const filteredAssigned = filterRequests(assignedRequests);
-
-  const handleAccept = async (requestId: bigint) => {
-    try {
-      await acceptRequestMutation.mutateAsync(requestId);
-      toast.success('Request accepted successfully!', {
-        description: 'You can now start working on this task',
-      });
-    } catch (error) {
-      toast.error('Failed to accept request');
-    }
-  };
-
-  const handleComplete = async (requestId: bigint) => {
-    try {
-      await completeRequestMutation.mutateAsync(requestId);
-      toast.success('Request marked as complete!', {
-        description: 'Great job completing this task',
-      });
-    } catch (error) {
-      toast.error('Failed to complete request');
-    }
-  };
 
   const handleSelectRequest = (request: RequestWithTextTasks) => {
     setSelectedRequest(request);
@@ -104,7 +79,7 @@ export default function HelperDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gradient">{filteredAvailable.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Ready to accept</p>
+              <p className="text-xs text-muted-foreground mt-1">Ready to view</p>
             </CardContent>
           </Card>
 
@@ -139,16 +114,13 @@ export default function HelperDashboardPage() {
           <TabsContent value="available" className="space-y-4">
             <RequestsTable
               requests={filteredAvailable}
-              showActions={true}
-              onAccept={handleAccept}
+              onSelectRequest={handleSelectRequest}
             />
           </TabsContent>
 
           <TabsContent value="assigned" className="space-y-4">
             <RequestsTable
               requests={filteredAssigned}
-              showActions={true}
-              onComplete={handleComplete}
               onSelectRequest={handleSelectRequest}
               showChat={true}
             />

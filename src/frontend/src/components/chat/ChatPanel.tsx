@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send } from 'lucide-react';
+import { Send, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ChatPanelProps {
@@ -15,13 +15,17 @@ interface ChatPanelProps {
 
 export default function ChatPanel({ requestId, requestTitle }: ChatPanelProps) {
   const [message, setMessage] = useState('');
-  const { data: messages = [], refetch } = useGetMessages(requestId);
+  const { data: messages = [], refetch, error: messagesError } = useGetMessages(requestId);
   const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkMessageAsRead();
   const { identity } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const currentUserPrincipal = identity?.getPrincipal().toString();
+
+  // Check if there's an authorization error
+  const isUnauthorized = messagesError && 
+    (String(messagesError).includes('Unauthorized') || String(messagesError).includes('Only the request owner'));
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -30,12 +34,14 @@ export default function ChatPanel({ requestId, requestTitle }: ChatPanelProps) {
   }, [messages]);
 
   useEffect(() => {
-    messages.forEach((msg) => {
-      if (!msg.isRead && msg.sender.toString() !== currentUserPrincipal) {
-        markAsReadMutation.mutate(msg.id);
-      }
-    });
-  }, [messages, currentUserPrincipal]);
+    if (!isUnauthorized) {
+      messages.forEach((msg) => {
+        if (!msg.isRead && msg.sender.toString() !== currentUserPrincipal) {
+          markAsReadMutation.mutate(msg.id);
+        }
+      });
+    }
+  }, [messages, currentUserPrincipal, isUnauthorized]);
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -44,10 +50,35 @@ export default function ChatPanel({ requestId, requestTitle }: ChatPanelProps) {
       await sendMessageMutation.mutateAsync({ requestId, content: message });
       setMessage('');
       refetch();
-    } catch (error) {
-      toast.error('Failed to send message');
+    } catch (error: any) {
+      if (error.message?.includes('Unauthorized') || error.message?.includes('Only the request owner')) {
+        toast.error('You do not have permission to send messages in this chat');
+      } else {
+        toast.error('Failed to send message');
+      }
     }
   };
+
+  // Show access denied state if unauthorized
+  if (isUnauthorized) {
+    return (
+      <Card className="h-[600px] flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-lg">Chat: {requestTitle}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex flex-col items-center justify-center gap-4 p-4">
+          <ShieldAlert className="h-16 w-16 text-muted-foreground" />
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-semibold">Access Denied</h3>
+            <p className="text-sm text-muted-foreground max-w-md">
+              You do not have permission to view or send messages in this chat. 
+              Only the request owner, assigned helper, and admin can access this conversation.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-[600px] flex flex-col">

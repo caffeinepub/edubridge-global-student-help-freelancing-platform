@@ -7,11 +7,6 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface http_request_result {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
 export interface Location {
     city: string;
     address: string;
@@ -22,21 +17,6 @@ export interface TransformationOutput {
     headers: Array<http_header>;
 }
 export type Time = bigint;
-export interface TransformationInput {
-    context: Uint8Array;
-    response: http_request_result;
-}
-export interface RequestWithTextTasks {
-    id: bigint;
-    status: RequestStatus;
-    tasks: Array<string>;
-    title: string;
-    owner: Principal;
-    createdAt: Time;
-    description: string;
-    assignedHelper?: Principal;
-    locationInfo?: Location;
-}
 export interface Rating {
     requestId: bigint;
     studentUserId: Principal;
@@ -44,6 +24,32 @@ export interface Rating {
     score: bigint;
     comment: string;
     helperUserId: Principal;
+}
+export interface http_header {
+    value: string;
+    name: string;
+}
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
+export interface RequestWithTextTasks {
+    id: bigint;
+    status: RequestStatus;
+    tasks: Array<string>;
+    title: string;
+    submissionLocation?: string;
+    owner: Principal;
+    createdAt: Time;
+    description: string;
+    assignedHelper?: Principal;
+    submissionMode: SubmissionMode;
+    locationInfo?: Location;
+}
+export interface TransformationInput {
+    context: Uint8Array;
+    response: http_request_result;
 }
 export interface Message {
     id: bigint;
@@ -60,17 +66,19 @@ export interface UserProfile {
     organization?: string;
     skills?: string;
 }
-export interface http_header {
-    value: string;
-    name: string;
-}
 export enum RequestStatus {
     pending = "pending",
     completed = "completed",
+    rejected = "rejected",
     accepted = "accepted"
+}
+export enum SubmissionMode {
+    offline = "offline",
+    online = "online"
 }
 export enum UserRole {
     helper = "helper",
+    client = "client",
     admin = "admin",
     business = "business",
     student = "student"
@@ -81,13 +89,12 @@ export enum UserRole__1 {
     guest = "guest"
 }
 export interface backendInterface {
-    acceptRequest(requestId: bigint): Promise<void>;
     addRating(requestId: bigint, helperUser: Principal, score: bigint, comment: string): Promise<void>;
     addTask(requestId: bigint, task: string): Promise<void>;
+    approveRequest(requestId: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole__1): Promise<void>;
     completeInitialization(): Promise<void>;
-    completeRequest(requestId: bigint): Promise<void>;
-    createRequest(title: string, description: string, location: Location | null, telegramChannelUrl: string): Promise<bigint>;
+    createWorkRequest(title: string, description: string, location: Location | null, submissionMode: SubmissionMode): Promise<bigint>;
     deleteRequest(requestId: bigint): Promise<void>;
     deleteUser(user: Principal): Promise<void>;
     filterRequestsByCity(city: string): Promise<Array<RequestWithTextTasks>>;
@@ -121,6 +128,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     markMessageAsRead(messageId: bigint): Promise<void>;
+    rejectRequest(requestId: bigint): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<string>;
     sendMessage(requestId: bigint, content: string): Promise<bigint>;
     setTelegramConfig(botToken: string, chatId: string): Promise<void>;

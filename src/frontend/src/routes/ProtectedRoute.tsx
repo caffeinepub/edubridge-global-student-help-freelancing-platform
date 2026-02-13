@@ -7,7 +7,7 @@ import { useIsCallerAdmin } from '../hooks/useAdmin';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'student' | 'helper' | 'business' | 'admin';
+  requiredRole?: 'student' | 'helper' | 'business' | 'admin' | 'client';
   nonAdminOnly?: boolean;
 }
 
@@ -44,6 +44,7 @@ export default function ProtectedRoute({ children, requiredRole, nonAdminOnly }:
       helper: UserRole.helper,
       business: UserRole.business,
       admin: UserRole.admin,
+      client: UserRole.client,
     };
 
     // For admin role, verify both profile role AND backend admin status

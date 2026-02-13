@@ -77,6 +77,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </Button>
             </>
           )}
+          {/* Client role gets no dashboard, only work request */}
         </>
       )}
     </>

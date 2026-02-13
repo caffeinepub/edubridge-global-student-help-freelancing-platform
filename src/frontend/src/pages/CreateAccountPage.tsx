@@ -13,6 +13,7 @@ import { usePageTitle } from '../seo/usePageTitle';
 import { toast } from 'sonner';
 import { UserPlus, Sparkles } from 'lucide-react';
 import FloatingShapes from '../components/animation/FloatingShapes';
+import { getSessionParameter } from '../utils/urlParams';
 
 export default function CreateAccountPage() {
   usePageTitle('Create Account');
@@ -26,8 +27,16 @@ export default function CreateAccountPage() {
     age: '',
     email: '',
     country: '',
-    role: 'student' as 'student' | 'helper' | 'business',
+    role: 'student' as 'student' | 'helper' | 'business' | 'client',
   });
+
+  useEffect(() => {
+    // Check for pre-selected role from landing page
+    const selectedRole = getSessionParameter('selectedRole');
+    if (selectedRole && (selectedRole === 'student' || selectedRole === 'client' || selectedRole === 'business')) {
+      setFormData(prev => ({ ...prev, role: selectedRole as any }));
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && !userProfile) {
@@ -58,6 +67,7 @@ export default function CreateAccountPage() {
         student: UserRole.student,
         helper: UserRole.helper,
         business: UserRole.business,
+        client: UserRole.client,
       };
 
       await saveProfileMutation.mutateAsync({
@@ -191,15 +201,21 @@ export default function CreateAccountPage() {
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg glass hover:glass-strong transition-all cursor-pointer">
-                  <RadioGroupItem value="helper" id="helper" />
-                  <Label htmlFor="helper" className="cursor-pointer flex-1">
-                    Freelancer
+                  <RadioGroupItem value="client" id="client" />
+                  <Label htmlFor="client" className="cursor-pointer flex-1">
+                    Client
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg glass hover:glass-strong transition-all cursor-pointer">
                   <RadioGroupItem value="business" id="business" />
                   <Label htmlFor="business" className="cursor-pointer flex-1">
                     Business
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 p-3 rounded-lg glass hover:glass-strong transition-all cursor-pointer">
+                  <RadioGroupItem value="helper" id="helper" />
+                  <Label htmlFor="helper" className="cursor-pointer flex-1">
+                    Freelancer
                   </Label>
                 </div>
               </RadioGroup>

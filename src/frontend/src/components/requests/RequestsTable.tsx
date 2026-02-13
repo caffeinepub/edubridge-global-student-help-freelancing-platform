@@ -8,28 +8,25 @@ import { useGetUnreadMessageCount } from '../../hooks/useChat';
 interface RequestsTableProps {
   requests: RequestWithTextTasks[];
   onSelectRequest?: (request: RequestWithTextTasks) => void;
-  showActions?: boolean;
-  onAccept?: (requestId: bigint) => void;
-  onComplete?: (requestId: bigint) => void;
   showChat?: boolean;
 }
 
 function StatusBadge({ status }: { status: RequestStatus }) {
-  const variants: Record<RequestStatus, 'default' | 'secondary' | 'outline'> = {
-    [RequestStatus.pending]: 'secondary',
-    [RequestStatus.accepted]: 'default',
-    [RequestStatus.completed]: 'outline',
+  const config = {
+    [RequestStatus.pending]: { variant: 'secondary' as const, label: 'Pending' },
+    [RequestStatus.accepted]: { variant: 'default' as const, label: 'Accepted' },
+    [RequestStatus.completed]: { variant: 'outline' as const, label: 'Completed' },
+    [RequestStatus.rejected]: { variant: 'destructive' as const, label: 'Rejected' },
   };
 
-  return <Badge variant={variants[status]}>{status}</Badge>;
+  const statusConfig = config[status] || { variant: 'default' as const, label: String(status) };
+
+  return <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>;
 }
 
-function RequestCard({ request, onSelect, showActions, onAccept, onComplete, showChat }: {
+function RequestCard({ request, onSelect, showChat }: {
   request: RequestWithTextTasks;
   onSelect?: (request: RequestWithTextTasks) => void;
-  showActions?: boolean;
-  onAccept?: (requestId: bigint) => void;
-  onComplete?: (requestId: bigint) => void;
   showChat?: boolean;
 }) {
   const { data: unreadCount } = useGetUnreadMessageCount(showChat ? request.id : null);
@@ -61,17 +58,7 @@ function RequestCard({ request, onSelect, showActions, onAccept, onComplete, sho
                 View Details
               </Button>
             )}
-            {showActions && request.status === RequestStatus.pending && onAccept && (
-              <Button size="sm" onClick={() => onAccept(request.id)}>
-                Accept Request
-              </Button>
-            )}
-            {showActions && request.status === RequestStatus.accepted && onComplete && (
-              <Button size="sm" onClick={() => onComplete(request.id)}>
-                Mark Complete
-              </Button>
-            )}
-            {showChat && request.assignedHelper && (
+            {showChat && (
               <Button variant="outline" size="sm" onClick={() => onSelect?.(request)}>
                 <MessageSquare className="h-4 w-4 mr-1" />
                 Chat
@@ -92,9 +79,6 @@ function RequestCard({ request, onSelect, showActions, onAccept, onComplete, sho
 export default function RequestsTable({
   requests,
   onSelectRequest,
-  showActions,
-  onAccept,
-  onComplete,
   showChat,
 }: RequestsTableProps) {
   if (requests.length === 0) {
@@ -114,9 +98,6 @@ export default function RequestsTable({
           key={request.id.toString()}
           request={request}
           onSelect={onSelectRequest}
-          showActions={showActions}
-          onAccept={onAccept}
-          onComplete={onComplete}
           showChat={showChat}
         />
       ))}

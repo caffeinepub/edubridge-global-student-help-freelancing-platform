@@ -34,7 +34,7 @@ export function getUrlParameter(paramName: string): string | null {
 
 /**
  * Stores a parameter in sessionStorage for persistence across navigation
- * Useful for maintaining state like admin tokens throughout the session
+ * Useful for maintaining state like admin tokens or selected roles throughout the session
  *
  * @param key - The key to store the value under
  * @param value - The value to store

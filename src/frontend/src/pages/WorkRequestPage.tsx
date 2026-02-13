@@ -4,16 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCreateRequest } from '../hooks/useRequests';
 import { useAuth } from '../hooks/useAuth';
 import RequestSuccessBanner from '../components/requests/RequestSuccessBanner';
 import { usePageTitle } from '../seo/usePageTitle';
 import { toast } from 'sonner';
-import { Send, MapPin, Sparkles } from 'lucide-react';
+import { Send, Sparkles, MapPin, Globe } from 'lucide-react';
 import FloatingShapes from '../components/animation/FloatingShapes';
 import { getHelpRequestErrorMessage } from '../utils/helpRequestErrors';
-import { UserRole } from '../backend';
+import { UserRole, SubmissionMode } from '../backend';
 
 export default function WorkRequestPage() {
   usePageTitle('Submit Work Request');
@@ -22,9 +22,11 @@ export default function WorkRequestPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
+    name: '',
+    age: '',
     title: '',
     description: '',
-    isOffline: false,
+    submissionMode: 'online' as 'online' | 'offline',
     city: '',
     address: '',
   });
@@ -32,7 +34,22 @@ export default function WorkRequestPage() {
   const canSubmitRequest = isAuthenticated && isProfileReady && 
     (userProfile?.role === UserRole.student || 
      userProfile?.role === UserRole.business || 
-     userProfile?.role === UserRole.helper);
+     userProfile?.role === UserRole.client);
+
+  const getRoleSpecificHelperText = () => {
+    if (!userProfile) return '';
+    
+    switch (userProfile.role) {
+      case UserRole.student:
+        return 'Title of work (e.g., assignment, homework)';
+      case UserRole.client:
+        return 'Title of work requested (e.g., freelancing task)';
+      case UserRole.business:
+        return 'Title of service/product';
+      default:
+        return 'Brief description of your request';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,32 +72,37 @@ export default function WorkRequestPage() {
       return;
     }
 
-    if (!formData.title || !formData.description) {
+    if (!formData.name || !formData.age || !formData.title || !formData.description) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    if (formData.isOffline && (!formData.city || !formData.address)) {
+    if (formData.submissionMode === 'offline' && (!formData.city || !formData.address)) {
       toast.error('Please provide location details for offline help');
       return;
     }
 
     try {
-      const location = formData.isOffline
+      const location = formData.submissionMode === 'offline'
         ? { city: formData.city, address: formData.address }
         : null;
+
+      const mode = formData.submissionMode === 'offline' ? SubmissionMode.offline : SubmissionMode.online;
 
       await createRequestMutation.mutateAsync({
         title: formData.title,
         description: formData.description,
         location,
+        submissionMode: mode,
       });
 
       setShowSuccess(true);
       setFormData({
+        name: '',
+        age: '',
         title: '',
         description: '',
-        isOffline: false,
+        submissionMode: 'online',
         city: '',
         address: '',
       });
@@ -102,7 +124,7 @@ export default function WorkRequestPage() {
             dashboardPath={
               userProfile?.role === UserRole.student 
                 ? '/dashboard/student' 
-                : '/dashboard/helper'
+                : '/work-request'
             }
           />
         </div>
@@ -130,15 +152,41 @@ export default function WorkRequestPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Your full name"
+                  required
+                  className="glass focus-glow transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="age" className="text-sm font-medium">Age *</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  placeholder="Your age"
+                  required
+                  className="glass focus-glow transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="title" className="text-sm font-medium">Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Brief description of your request"
+                  placeholder={getRoleSpecificHelperText()}
                   required
                   className="glass focus-glow transition-all"
                 />
+                <p className="text-xs text-muted-foreground">{getRoleSpecificHelperText()}</p>
               </div>
 
               <div className="space-y-2">
@@ -154,24 +202,43 @@ export default function WorkRequestPage() {
                 />
               </div>
 
-              <div className="flex items-center space-x-3 p-4 rounded-lg glass hover:glass-strong transition-all">
-                <Checkbox
-                  id="offline"
-                  checked={formData.isOffline}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isOffline: checked as boolean })
-                  }
-                />
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <Label htmlFor="offline" className="cursor-pointer font-medium">
-                    I need offline/in-person help
-                  </Label>
-                </div>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Submission Mode *</Label>
+                <RadioGroup
+                  value={formData.submissionMode}
+                  onValueChange={(value) => setFormData({ ...formData, submissionMode: value as 'online' | 'offline' })}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-3 p-4 rounded-lg glass hover:glass-strong transition-all cursor-pointer">
+                    <RadioGroupItem value="online" id="online" />
+                    <div className="flex items-center gap-2 flex-1">
+                      <Globe className="h-4 w-4 text-primary" />
+                      <Label htmlFor="online" className="cursor-pointer font-medium">
+                        Online
+                      </Label>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 p-4 rounded-lg glass hover:glass-strong transition-all cursor-pointer">
+                    <RadioGroupItem value="offline" id="offline" />
+                    <div className="flex items-center gap-2 flex-1">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <Label htmlFor="offline" className="cursor-pointer font-medium">
+                        Offline (In-person)
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
               </div>
 
-              {formData.isOffline && (
-                <div className="space-y-4 p-4 rounded-lg glass animate-fade-in">
+              {formData.submissionMode === 'offline' && (
+                <div className="space-y-4 p-4 rounded-lg glass-strong border border-primary/20 animate-fade-in">
+                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
+                    <p className="font-medium">
+                      Meeting Location: <span className="text-foreground">Moon Bake, Kengeri Satellite Town, Bangalore 560060</span>
+                    </p>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="city" className="text-sm font-medium">City *</Label>
                     <Input
@@ -179,7 +246,7 @@ export default function WorkRequestPage() {
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="Enter your city"
-                      required={formData.isOffline}
+                      required={formData.submissionMode === 'offline'}
                       className="glass focus-glow transition-all"
                     />
                   </div>
@@ -192,7 +259,7 @@ export default function WorkRequestPage() {
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       placeholder="Enter your full address"
                       rows={3}
-                      required={formData.isOffline}
+                      required={formData.submissionMode === 'offline'}
                       className="glass focus-glow transition-all resize-none"
                     />
                   </div>

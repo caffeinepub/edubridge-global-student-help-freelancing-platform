@@ -29,18 +29,23 @@ export interface Rating {
 }
 export type RequestStatus = { 'pending' : null } |
   { 'completed' : null } |
+  { 'rejected' : null } |
   { 'accepted' : null };
 export interface RequestWithTextTasks {
   'id' : bigint,
   'status' : RequestStatus,
   'tasks' : Array<string>,
   'title' : string,
+  'submissionLocation' : [] | [string],
   'owner' : Principal,
   'createdAt' : Time,
   'description' : string,
   'assignedHelper' : [] | [Principal],
+  'submissionMode' : SubmissionMode,
   'locationInfo' : [] | [Location],
 }
+export type SubmissionMode = { 'offline' : null } |
+  { 'online' : null };
 export type Time = bigint;
 export interface TransformationInput {
   'context' : Uint8Array,
@@ -59,6 +64,7 @@ export interface UserProfile {
   'skills' : [] | [string],
 }
 export type UserRole = { 'helper' : null } |
+  { 'client' : null } |
   { 'admin' : null } |
   { 'business' : null } |
   { 'student' : null };
@@ -73,14 +79,13 @@ export interface http_request_result {
 }
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'acceptRequest' : ActorMethod<[bigint], undefined>,
   'addRating' : ActorMethod<[bigint, Principal, bigint, string], undefined>,
   'addTask' : ActorMethod<[bigint, string], undefined>,
+  'approveRequest' : ActorMethod<[bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
   'completeInitialization' : ActorMethod<[], undefined>,
-  'completeRequest' : ActorMethod<[bigint], undefined>,
-  'createRequest' : ActorMethod<
-    [string, string, [] | [Location], string],
+  'createWorkRequest' : ActorMethod<
+    [string, string, [] | [Location], SubmissionMode],
     bigint
   >,
   'deleteRequest' : ActorMethod<[bigint], undefined>,
@@ -125,6 +130,7 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'markMessageAsRead' : ActorMethod<[bigint], undefined>,
+  'rejectRequest' : ActorMethod<[bigint], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], string>,
   'sendMessage' : ActorMethod<[bigint, string], bigint>,
   'setTelegramConfig' : ActorMethod<[string, string], undefined>,

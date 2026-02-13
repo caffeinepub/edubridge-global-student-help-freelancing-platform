@@ -1,140 +1,171 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T14:25:10.102Z",
+  "generatedAt": "2026-02-12T18:45:39.230Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 5,
+    "total": 9,
+    "implemented": 9,
     "items": [
       {
-        "id": "REQ-31",
-        "summary": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
+        "id": "REQ-1",
+        "summary": "Add a new user role named \"client\" across the app, so users can register and be treated distinctly from students, businesses, and freelancers/helpers.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/routes/ProtectedRoute.tsx",
-          "frontend/src/App.tsx",
+          "frontend/src/hooks/useAuth.ts",
           "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/pages/WorkRequestPage.tsx",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+          "frontend/src/pages/LoginPage.tsx",
+          "frontend/src/routes/ProtectedRoute.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/routes/ProtectedRoute.tsx",
-          "frontend/src/App.tsx",
+          "frontend/src/hooks/useAuth.ts",
           "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/pages/WorkRequestPage.tsx",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+          "frontend/src/routes/ProtectedRoute.tsx"
         ]
       },
       {
-        "id": "REQ-32",
-        "summary": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
+        "id": "REQ-2",
+        "summary": "Update the landing (\"/\") experience to include a clear entry selection section with exactly three prominent options: \"Student\", \"Client\", and \"Business\", using appealing transition-style typography/animation consistent with the current site style (do not redesign the overall theme).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/StudentRequestHelpPage.tsx",
-          "frontend/src/pages/FreelancingHelpPage.tsx",
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/utils/urlParams.ts",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/utils/urlParams.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Update the Create Account flow to support the new \"Client\" role and keep existing roles working; ensure all user-facing role labels are in English and consistent (Student, Client, Business, and existing Freelancer/Helper if still supported).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/CreateAccountPage.tsx",
+          "frontend/src/hooks/useAuth.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/CreateAccountPage.tsx",
+          "frontend/src/hooks/useAuth.ts"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Upgrade the authenticated request submission form (currently routed at \"/work-request\") to capture and submit, for Student/Client/Business: Name, Age, Title, and Description (with role-specific helper text/examples matching the user request).",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/hooks/useRequests.ts",
           "frontend/src/utils/helpRequestErrors.ts"
         ],
         "matchedFiles": [
           "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/hooks/useRequests.ts",
           "frontend/src/utils/helpRequestErrors.ts"
         ]
       },
       {
-        "id": "REQ-33",
-        "summary": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
+        "id": "REQ-5",
+        "summary": "Add submission mode options \"Online\" and \"Offline\" to the request form for Student/Client/Business. If \"Offline\" is selected, show an on-screen notification containing exactly: \"Meet at Moon Bake, Kengeri Satellite Town, Bangalore 560060.\" and ensure the submitted request is marked/stored as offline with that location information.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/owner/OwnerInboxPage.tsx",
-          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/hooks/useRequests.ts"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/owner/OwnerInboxPage.tsx",
-          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx"
+          "frontend/src/pages/WorkRequestPage.tsx",
+          "frontend/src/hooks/useRequests.ts"
         ]
       },
       {
-        "id": "REQ-34",
-        "summary": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-35",
-        "summary": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
+        "id": "REQ-6",
+        "summary": "Ensure that after Student/Client/Business submit a request, it is visible to the owner/admin for review in the existing owner inbox and detail pages, and the owner can accept or reject it and initiate conversation with the user.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useAdmin.ts",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx",
-          "frontend/src/hooks/useRequests.ts",
-          "frontend/src/pages/StudentRequestHelpPage.tsx",
+          "frontend/src/pages/owner/OwnerInboxPage.tsx",
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "frontend/src/components/requests/RequestsTable.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/owner/OwnerInboxPage.tsx",
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Implement acceptance/rejection notifications to the submitting user: when the owner/admin accepts a request, the user receives a confirmation message; when rejected, the user receives a rejection message encouraging them to try again. Notifications must be in English and delivered within the app (e.g., as an automatic chat/system message tied to the request, and/or a status banner in the user dashboard).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "frontend/src/hooks/useChat.ts",
+          "frontend/src/pages/dashboards/StudentDashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
+          "frontend/src/hooks/useChat.ts",
+          "frontend/src/pages/dashboards/StudentDashboardPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Preserve the existing website look-and-feel while implementing the above changes; do not introduce a new theme. If any new UI elements are added (entry selection, new fields, online/offline controls), they must reuse the existing glass/gradient/animation patterns already present in the app for a consistent experience across devices.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/WorkRequestPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useAdmin.ts",
-          "frontend/src/pages/owner/OwnerConsolePage.tsx",
-          "frontend/src/hooks/useRequests.ts",
+          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/WorkRequestPage.tsx"
         ]
       },
       {
-        "id": "REQ-36",
-        "summary": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
+        "id": "REQ-9",
+        "summary": "Provide a comprehensive implementation guide/design specification inside the repo that documents: roles (Student/Client/Business/Helper/Admin), the entry-selection flow, all form fields, submission-mode behavior (Online/Offline + Moon Bake notice), and the accept/reject notification behavior (including exact user-facing message copy).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/owner/OwnerConsolePage.tsx",
-          "frontend/src/pages/dashboards/AdminDashboardPage.tsx",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/App.tsx"
+          "frontend/docs/edubridge-roles-requests-and-notifications.md",
+          "frontend/README.md"
         ],
         "matchedFiles": [
-          "frontend/src/pages/owner/OwnerConsolePage.tsx",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/App.tsx"
+          "frontend/docs/edubridge-roles-requests-and-notifications.md"
         ]
-      },
-      {
-        "id": "REQ-37",
-        "summary": "Enforce the “single owner” expectation: prevent creation/assignment of additional Admin users beyond the business owner, and ensure only the owner can access owner-only admin operations.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/http-outcalls/outcall.mo",
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
+    "frontend/docs/edubridge-roles-requests-and-notifications.md",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/animation/RevealOnScroll.tsx",
     "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/components/owner/TelegramConfigCard.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useAdmin.ts",
+    "frontend/src/hooks/useAuth.ts",
+    "frontend/src/hooks/useChat.ts",
     "frontend/src/hooks/useRequests.ts",
+    "frontend/src/pages/CreateAccountPage.tsx",
+    "frontend/src/pages/FreelancingHelpPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/StudentRequestHelpPage.tsx",
     "frontend/src/pages/WorkRequestPage.tsx",
-    "frontend/src/pages/owner/OwnerConsolePage.tsx",
+    "frontend/src/pages/dashboards/StudentDashboardPage.tsx",
     "frontend/src/pages/owner/OwnerInboxPage.tsx",
     "frontend/src/pages/owner/OwnerRequestDetailPage.tsx",
     "frontend/src/routes/ProtectedRoute.tsx",
     "frontend/src/utils/helpRequestErrors.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

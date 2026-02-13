@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { RequestWithTextTasks, Location, RequestStatus } from '../backend';
+import { RequestWithTextTasks, Location, RequestStatus, SubmissionMode } from '../backend';
 
 const TELEGRAM_CHANNEL_URL = 'https://t.me/techcrunchz';
 
@@ -9,28 +9,54 @@ export function useCreateRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      title,
-      description,
+    mutationFn: async ({ 
+      title, 
+      description, 
       location,
-    }: {
-      title: string;
-      description: string;
+      submissionMode 
+    }: { 
+      title: string; 
+      description: string; 
       location: Location | null;
+      submissionMode: SubmissionMode;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      try {
-        return await actor.createRequest(title, description, location, TELEGRAM_CHANNEL_URL);
-      } catch (error) {
-        // Re-throw with original error to preserve backend error messages
-        throw error;
-      }
+      return actor.createWorkRequest(title, description, location, submissionMode);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
       queryClient.invalidateQueries({ queryKey: ['myRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['availableRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['allRequests'] });
+      
+      if (typeof window !== 'undefined') {
+        window.open(TELEGRAM_CHANNEL_URL, '_blank');
+      }
     },
+  });
+}
+
+export function useGetAllRequests() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<RequestWithTextTasks[]>({
+    queryKey: ['requests', 'all'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllRequests();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useGetRequestsByStatus(status: RequestStatus) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<RequestWithTextTasks[]>({
+    queryKey: ['requests', 'status', status],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getRequestsByStatus(status);
+    },
+    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -51,7 +77,7 @@ export function useGetAvailableRequests() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<RequestWithTextTasks[]>({
-    queryKey: ['availableRequests'],
+    queryKey: ['requests', 'available'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAvailableRequests();
@@ -64,7 +90,7 @@ export function useGetMyAssignedRequests() {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<RequestWithTextTasks[]>({
-    queryKey: ['myAssignedRequests'],
+    queryKey: ['requests', 'assigned'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getMyAssignedRequests();
@@ -73,62 +99,15 @@ export function useGetMyAssignedRequests() {
   });
 }
 
-export function useAcceptRequest() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (requestId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.acceptRequest(requestId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['availableRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['myAssignedRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['allRequests'] });
-    },
-  });
-}
-
-export function useCompleteRequest() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (requestId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.completeRequest(requestId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myAssignedRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['myRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['allRequests'] });
-    },
-  });
-}
-
 export function useFilterRequestsByCity(city: string) {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<RequestWithTextTasks[]>({
-    queryKey: ['requestsByCity', city],
-    queryFn: async () => {
-      if (!actor || !city) return [];
-      return actor.filterRequestsByCity(city);
-    },
-    enabled: !!actor && !actorFetching && !!city,
-  });
-}
-
-export function useGetRequestsByStatus(status: RequestStatus) {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<RequestWithTextTasks[]>({
-    queryKey: ['requestsByStatus', status],
+    queryKey: ['requests', 'city', city],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getRequestsByStatus(status);
+      return actor.filterRequestsByCity(city);
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !actorFetching && city.length > 0,
   });
 }

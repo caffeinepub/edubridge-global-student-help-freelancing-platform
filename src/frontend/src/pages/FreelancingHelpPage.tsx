@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { Send, Sparkles } from 'lucide-react';
 import FloatingShapes from '../components/animation/FloatingShapes';
 import { getHelpRequestErrorMessage } from '../utils/helpRequestErrors';
-import { UserRole } from '../backend';
+import { UserRole, SubmissionMode } from '../backend';
 
 export default function FreelancingHelpPage() {
   usePageTitle('Freelancing Help');
@@ -59,6 +59,7 @@ export default function FreelancingHelpPage() {
         title: formData.title,
         description: formData.description,
         location: null,
+        submissionMode: SubmissionMode.online,
       });
       setSubmitted(true);
     } catch (error) {

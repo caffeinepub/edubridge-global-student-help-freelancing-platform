@@ -14,9 +14,14 @@ export const UserRole__1 = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const Location = IDL.Record({ 'city' : IDL.Text, 'address' : IDL.Text });
+export const SubmissionMode = IDL.Variant({
+  'offline' : IDL.Null,
+  'online' : IDL.Null,
+});
 export const RequestStatus = IDL.Variant({
   'pending' : IDL.Null,
   'completed' : IDL.Null,
+  'rejected' : IDL.Null,
   'accepted' : IDL.Null,
 });
 export const Time = IDL.Int;
@@ -25,10 +30,12 @@ export const RequestWithTextTasks = IDL.Record({
   'status' : RequestStatus,
   'tasks' : IDL.Vec(IDL.Text),
   'title' : IDL.Text,
+  'submissionLocation' : IDL.Opt(IDL.Text),
   'owner' : IDL.Principal,
   'createdAt' : Time,
   'description' : IDL.Text,
   'assignedHelper' : IDL.Opt(IDL.Principal),
+  'submissionMode' : SubmissionMode,
   'locationInfo' : IDL.Opt(Location),
 });
 export const Rating = IDL.Record({
@@ -41,6 +48,7 @@ export const Rating = IDL.Record({
 });
 export const UserRole = IDL.Variant({
   'helper' : IDL.Null,
+  'client' : IDL.Null,
   'admin' : IDL.Null,
   'business' : IDL.Null,
   'student' : IDL.Null,
@@ -81,14 +89,13 @@ export const TransformationOutput = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'acceptRequest' : IDL.Func([IDL.Nat], [], []),
   'addRating' : IDL.Func([IDL.Nat, IDL.Principal, IDL.Nat, IDL.Text], [], []),
   'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+  'approveRequest' : IDL.Func([IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
   'completeInitialization' : IDL.Func([], [], []),
-  'completeRequest' : IDL.Func([IDL.Nat], [], []),
-  'createRequest' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Opt(Location), IDL.Text],
+  'createWorkRequest' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Opt(Location), SubmissionMode],
       [IDL.Nat],
       [],
     ),
@@ -160,6 +167,7 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'markMessageAsRead' : IDL.Func([IDL.Nat], [], []),
+  'rejectRequest' : IDL.Func([IDL.Nat], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [IDL.Text], []),
   'sendMessage' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
   'setTelegramConfig' : IDL.Func([IDL.Text, IDL.Text], [], []),
@@ -179,9 +187,14 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const Location = IDL.Record({ 'city' : IDL.Text, 'address' : IDL.Text });
+  const SubmissionMode = IDL.Variant({
+    'offline' : IDL.Null,
+    'online' : IDL.Null,
+  });
   const RequestStatus = IDL.Variant({
     'pending' : IDL.Null,
     'completed' : IDL.Null,
+    'rejected' : IDL.Null,
     'accepted' : IDL.Null,
   });
   const Time = IDL.Int;
@@ -190,10 +203,12 @@ export const idlFactory = ({ IDL }) => {
     'status' : RequestStatus,
     'tasks' : IDL.Vec(IDL.Text),
     'title' : IDL.Text,
+    'submissionLocation' : IDL.Opt(IDL.Text),
     'owner' : IDL.Principal,
     'createdAt' : Time,
     'description' : IDL.Text,
     'assignedHelper' : IDL.Opt(IDL.Principal),
+    'submissionMode' : SubmissionMode,
     'locationInfo' : IDL.Opt(Location),
   });
   const Rating = IDL.Record({
@@ -206,6 +221,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const UserRole = IDL.Variant({
     'helper' : IDL.Null,
+    'client' : IDL.Null,
     'admin' : IDL.Null,
     'business' : IDL.Null,
     'student' : IDL.Null,
@@ -243,14 +259,13 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'acceptRequest' : IDL.Func([IDL.Nat], [], []),
     'addRating' : IDL.Func([IDL.Nat, IDL.Principal, IDL.Nat, IDL.Text], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'approveRequest' : IDL.Func([IDL.Nat], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
     'completeInitialization' : IDL.Func([], [], []),
-    'completeRequest' : IDL.Func([IDL.Nat], [], []),
-    'createRequest' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Opt(Location), IDL.Text],
+    'createWorkRequest' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Opt(Location), SubmissionMode],
         [IDL.Nat],
         [],
       ),
@@ -331,6 +346,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'markMessageAsRead' : IDL.Func([IDL.Nat], [], []),
+    'rejectRequest' : IDL.Func([IDL.Nat], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [IDL.Text], []),
     'sendMessage' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
     'setTelegramConfig' : IDL.Func([IDL.Text, IDL.Text], [], []),

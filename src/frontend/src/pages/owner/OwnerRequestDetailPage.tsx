@@ -3,33 +3,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { usePageTitle } from '../../seo/usePageTitle';
-import { useGetAllRequests } from '../../hooks/useAdmin';
+import { useGetAllRequests, useApproveRequest, useRejectRequest } from '../../hooks/useAdmin';
 import ChatPanel from '../../components/chat/ChatPanel';
 import FloatingShapes from '../../components/animation/FloatingShapes';
-import { ArrowLeft, MapPin, Clock, User, CheckCircle2 } from 'lucide-react';
-import { RequestStatus } from '../../backend';
+import { ArrowLeft, MapPin, Clock, User, CheckCircle2, Check, X, Globe } from 'lucide-react';
+import { RequestStatus, SubmissionMode } from '../../backend';
+import { toast } from 'sonner';
 
 export default function OwnerRequestDetailPage() {
   const { requestId } = useParams({ from: '/owner/inbox/$requestId' });
   const navigate = useNavigate();
   const { data: requests = [], isLoading } = useGetAllRequests();
+  const approveRequestMutation = useApproveRequest();
+  const rejectRequestMutation = useRejectRequest();
 
   const request = requests.find(r => r.id.toString() === requestId);
 
   usePageTitle(request ? `Request: ${request.title}` : 'Request Details');
 
   const getStatusBadge = (status: RequestStatus) => {
-    const variants = {
-      pending: 'default',
-      accepted: 'secondary',
-      completed: 'outline',
-    } as const;
+    const config = {
+      [RequestStatus.pending]: { variant: 'default' as const, label: 'Pending' },
+      [RequestStatus.accepted]: { variant: 'secondary' as const, label: 'Accepted' },
+      [RequestStatus.completed]: { variant: 'outline' as const, label: 'Completed' },
+      [RequestStatus.rejected]: { variant: 'destructive' as const, label: 'Rejected' },
+    };
+
+    const statusConfig = config[status] || { variant: 'default' as const, label: String(status) };
 
     return (
-      <Badge variant={variants[status]} className="text-sm">
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+      <Badge variant={statusConfig.variant} className="text-sm">
+        {statusConfig.label}
       </Badge>
     );
+  };
+
+  const handleApprove = async () => {
+    if (!request) return;
+    try {
+      await approveRequestMutation.mutateAsync(request.id);
+      toast.success('Request approved successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve request');
+    }
+  };
+
+  const handleReject = async () => {
+    if (!request) return;
+    try {
+      await rejectRequestMutation.mutateAsync(request.id);
+      toast.success('Request rejected');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject request');
+    }
   };
 
   if (isLoading) {
@@ -84,6 +110,34 @@ export default function OwnerRequestDetailPage() {
           {getStatusBadge(request.status)}
         </div>
 
+        {/* Admin Moderation Actions */}
+        {request.status === RequestStatus.pending && (
+          <Card className="glass-strong border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-lg">Moderation Actions</CardTitle>
+              <CardDescription>Review and approve or reject this request</CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-3">
+              <Button
+                onClick={handleApprove}
+                disabled={approveRequestMutation.isPending}
+                className="gradient-primary hover:glow-primary text-white"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                {approveRequestMutation.isPending ? 'Approving...' : 'Accept Request'}
+              </Button>
+              <Button
+                onClick={handleReject}
+                disabled={rejectRequestMutation.isPending}
+                variant="destructive"
+              >
+                <X className="h-4 w-4 mr-2" />
+                {rejectRequestMutation.isPending ? 'Rejecting...' : 'Reject Request'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Request Details */}
           <div className="space-y-6">
@@ -112,6 +166,33 @@ export default function OwnerRequestDetailPage() {
                 </div>
 
                 <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Submission Mode</h3>
+                  <div className="flex items-center gap-2">
+                    {request.submissionMode === SubmissionMode.online ? (
+                      <>
+                        <Globe className="h-4 w-4 text-primary" />
+                        <span className="text-primary font-medium">Online</span>
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="h-4 w-4 text-accent" />
+                        <span className="text-accent font-medium">Offline (In-person)</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {request.submissionMode === SubmissionMode.offline && request.submissionLocation && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Meeting Location</h3>
+                    <div className="flex items-start gap-1 text-sm bg-accent/10 p-3 rounded-lg">
+                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-accent" />
+                      <span>{request.submissionLocation}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Requester</h3>
                   <div className="flex items-center gap-1 text-sm">
                     <User className="h-4 w-4" />
@@ -121,7 +202,7 @@ export default function OwnerRequestDetailPage() {
 
                 {request.locationInfo && (
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Location</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">User Location</h3>
                     <div className="flex items-start gap-1 text-sm">
                       <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <div>

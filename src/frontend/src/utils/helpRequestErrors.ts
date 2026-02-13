@@ -1,28 +1,25 @@
-/**
- * Maps backend errors from help request creation to user-friendly messages
- */
 export function getHelpRequestErrorMessage(error: unknown): string {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  
-  // Check for authorization/permission errors
-  if (errorMessage.includes('Unauthorized') || errorMessage.includes('Only authenticated users can create requests')) {
-    return 'You do not have permission to submit work requests. Please log in to continue.';
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message: string }).message;
+    
+    if (message.includes('Only authenticated users can create work requests')) {
+      return 'Please log in to submit a work request.';
+    }
+    
+    if (message.includes('Only students, clients, and businesses can submit work requests')) {
+      return 'Only students, clients, and businesses can submit work requests.';
+    }
+    
+    if (message.includes('Unauthorized')) {
+      return 'You do not have permission to perform this action.';
+    }
+    
+    if (message.includes('Request not found')) {
+      return 'The requested item could not be found.';
+    }
+    
+    return message;
   }
   
-  if (errorMessage.includes('Only users can create requests')) {
-    return 'Please log in to submit a work request.';
-  }
-  
-  // Check for validation errors
-  if (errorMessage.includes('Request not found')) {
-    return 'The request could not be found.';
-  }
-  
-  // Generic backend error
-  if (errorMessage.includes('Actor not available')) {
-    return 'Unable to connect to the service. Please try again.';
-  }
-  
-  // Default error message
-  return 'Failed to submit your request. Please try again.';
+  return 'An unexpected error occurred. Please try again.';
 }

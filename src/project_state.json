@@ -1,294 +1,83 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Full-stack responsive web application \"EduBridge – Global Student Help & Freelancing Platform\" with an owner-only Admin experience: separate user vs owner entry points, users can submit work requests, and all submissions must be delivered to the single site owner both inside the Admin inbox/chat and via Telegram channel notifications, while strictly preventing non-admin users from accessing any Admin pages.",
+  "projectStateVersion": 3,
+  "summary": "Web application platform for students, clients, and businesses to submit requests/services, with authentication, role-based entry flows, owner/admin review (accept/reject) and messaging, plus online/offline submission options and user notifications, while keeping the existing site’s design and updating functionality accordingly.",
   "architectural_notes": [
-    "Role-based access control with roles: Student, Helper/Freelancer, Business, Admin.",
-    "Requests support Online vs Offline; Offline requires additional location fields (location/city/address).",
-    "Core data entities: Users, Requests, Tasks, Ratings, Messages.",
-    "Visual design direction updated to premium SaaS UI using glassmorphism (blurred cards) and a blue–purple–cyan gradient palette, with lightweight micro-animations and strong accessibility contrast in both light/dark modes.",
-    "Admin section must be inaccessible to non-admin users via frontend route guards and backend authorization; only Admin (site owner) can access admin pages.",
-    "Introduce an owner-centric intake flow: all request form submissions should be visible to the site owner for response and follow-up (inbox + chat).",
-    "Owner is the single Admin; Admin pages should be customized for the owner and remain inaccessible to all non-admin roles.",
-    "Work request submissions must fan-out to two destinations: (1) internal owner Admin inbox/chat and (2) Telegram channel notifications (techcrunchz)."
+    "Owner/admin moderation workflow required: all submissions routed to admin for accept/reject and conversation initiation.",
+    "UI requirement: keep existing site design unchanged while updating functionality."
   ],
-  "known_issues": [
-    "Draft app/preview expired after deployment; requires rebuild to continue making changes.",
-    "Custom domain/slug must be 5–50 characters and contain only letters, numbers, and hyphens (no special characters like '&' or punctuation).",
-    "Help request submission is failing for users with error \"unable to send message\" when trying to write/submit a help request.",
-    "User reports current build is \"not going\" / not working as expected (needs clarification on what is failing: request submission, chat, routing, or admin access)."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-create-the-core-information-architecture-and-routing-for-edubridge-with-the-following-pages-screens-landing-login-create-account-student-request-help-freelancing-service-help-student-dashboard-helper-dashboard-admin-dashboard-and-a-not-found-page",
-      "title": "Create the core information architecture and routing for EduBridge with the following pages/screens: Landing, Login, Create Account, Student Request Help, Freelancing & Service Help, Student Dashboard, Helper Dashboard, Admin Dashboard, and a Not Found page.",
+      "id": "feature-add-a-new-user-role-named-client-across-the-app-so-users-can-register-and-be-treated-distinctly-from-students-businesses-and-freelancers-helpers",
+      "title": "Add a new user role named \"client\" across the app, so users can register and be treated distinctly from students, businesses, and freelancers/helpers.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-cohesive-modern-professional-visual-theme-across-the-app-with-a-distinct-gradient-based-style-not-blue-purple-by-default-consistent-typography-spacing-and-components-include-smooth-micro-interactions-and-maintain-visual-parity-in-both-light-and-dark-modes",
-      "title": "Implement a cohesive modern professional visual theme across the app with a distinct gradient-based style (not blue/purple by default), consistent typography, spacing, and components; include smooth micro-interactions and maintain visual parity in both Light and Dark modes.",
+      "id": "feature-update-the-landing-experience-to-include-a-clear-entry-selection-section-with-exactly-three-prominent-options-student-client-and-business-using-appealing-transition-style-typography-animation-consistent-with-the-current-site-style-do-not-redesign-the-overall-theme",
+      "title": "Update the landing (\"/\") experience to include a clear entry selection section with exactly three prominent options: \"Student\", \"Client\", and \"Business\", using appealing transition-style typography/animation consistent with the current site style (do not redesign the overall theme).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-the-landing-page-with-an-animated-hero-banner-featuring-typing-text-exactly-helping-students-completing-projects-supporting-businesses-primary-ctas-for-login-create-account-and-request-help-a-section-highlighting-students-help-freelancing-services-and-business-support-scroll-animations-and-hover-effects",
-      "title": "Build the Landing Page with: an animated hero banner featuring typing text exactly \"Helping Students • Completing Projects • Supporting Businesses\"; primary CTAs for Login, Create Account, and Request Help; a section highlighting Students Help, Freelancing Services, and Business Support; scroll animations and hover effects.",
+      "id": "feature-update-the-create-account-flow-to-support-the-new-client-role-and-keep-existing-roles-working-ensure-all-user-facing-role-labels-are-in-english-and-consistent-student-client-business-and-existing-freelancer-helper-if-still-supported",
+      "title": "Update the Create Account flow to support the new \"Client\" role and keep existing roles working; ensure all user-facing role labels are in English and consistent (Student, Client, Business, and existing Freelancer/Helper if still supported).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-email-password-authentication-with-role-selection-and-account-creation-including-the-specified-fields-and-validations-and-connect-it-to-backend-authentication-apis",
-      "title": "Implement email/password authentication with role selection and account creation, including the specified fields and validations, and connect it to backend authentication APIs.",
+      "id": "feature-upgrade-the-authenticated-request-submission-form-currently-routed-at-work-request-to-capture-and-submit-for-student-client-business-name-age-title-and-description-with-role-specific-helper-text-examples-matching-the-user-request",
+      "title": "Upgrade the authenticated request submission form (currently routed at \"/work-request\") to capture and submit, for Student/Client/Business: Name, Age, Title, and Description (with role-specific helper text/examples matching the user request).",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-role-based-access-control-rbac-in-the-backend-and-frontend-route-guards-so-that-student-helper-freelancer-business-and-admin-capabilities-are-separated-and-protected",
-      "title": "Implement role-based access control (RBAC) in the backend and frontend route-guards so that Student, Helper/Freelancer, Business, and Admin capabilities are separated and protected.",
+      "id": "feature-add-submission-mode-options-online-and-offline-to-the-request-form-for-student-client-business-if-offline-is-selected-show-an-on-screen-notification-containing-exactly-meet-at-moon-bake-kengeri-satellite-town-bangalore-560060-and-ensure-the-submitted-request-is-marked-stored-as-offline-with-that-location-information",
+      "title": "Add submission mode options \"Online\" and \"Offline\" to the request form for Student/Client/Business. If \"Offline\" is selected, show an on-screen notification containing exactly: \"Meet at Moon Bake, Kengeri Satellite Town, Bangalore 560060.\" and ensure the submitted request is marked/stored as offline with that location information.",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-the-student-request-help-page-and-its-submission-flow-with-the-exact-form-fields-specified-including-manual-text-description-boxes-for-subject-and-topic-a-large-help-description-textarea-an-online-offline-selection-and-conditional-offline-address-fields-location-city-address-do-not-include-any-file-upload-anywhere",
-      "title": "Create the Student Request Help page and its submission flow with the exact form fields specified, including manual text description boxes for Subject and Topic, a large help description textarea, an Online/Offline selection, and conditional offline address fields (Location, City, Address). Do not include any file upload anywhere.",
+      "id": "feature-ensure-that-after-student-client-business-submit-a-request-it-is-visible-to-the-owner-admin-for-review-in-the-existing-owner-inbox-and-detail-pages-and-the-owner-can-accept-or-reject-it-and-initiate-conversation-with-the-user",
+      "title": "Ensure that after Student/Client/Business submit a request, it is visible to the owner/admin for review in the existing owner inbox and detail pages, and the owner can accept or reject it and initiate conversation with the user.",
       "reqIds": [
         "REQ-6"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-the-freelancing-service-help-page-without-category-cards-instead-provide-a-help-request-section-where-users-enter-a-title-and-a-large-description-then-submit-the-help-request-to-the-backend",
-      "title": "Create the Freelancing & Service Help page without category cards; instead provide a Help Request section where users enter a title and a large description, then submit the help request to the backend.",
+      "id": "feature-implement-acceptance-rejection-notifications-to-the-submitting-user-when-the-owner-admin-accepts-a-request-the-user-receives-a-confirmation-message-when-rejected-the-user-receives-a-rejection-message-encouraging-them-to-try-again-notifications-must-be-in-english-and-delivered-within-the-app-e-g-as-an-automatic-chat-system-message-tied-to-the-request-and-or-a-status-banner-in-the-user-dashboard",
+      "title": "Implement acceptance/rejection notifications to the submitting user: when the owner/admin accepts a request, the user receives a confirmation message; when rejected, the user receives a rejection message encouraging them to try again. Notifications must be in English and delivered within the app (e.g., as an automatic chat/system message tied to the request, and/or a status banner in the user dashboard).",
       "reqIds": [
         "REQ-7"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-student-dashboard-to-display-the-current-student-s-submitted-requests-with-statuses-pending-accepted-completed-and-provide-entry-points-to-chat-with-the-assigned-helper-where-applicable",
-      "title": "Implement the Student Dashboard to display the current student's submitted requests with statuses (Pending / Accepted / Completed) and provide entry points to chat with the assigned helper where applicable.",
+      "id": "feature-preserve-the-existing-website-look-and-feel-while-implementing-the-above-changes-do-not-introduce-a-new-theme-if-any-new-ui-elements-are-added-entry-selection-new-fields-online-offline-controls-they-must-reuse-the-existing-glass-gradient-animation-patterns-already-present-in-the-app-for-a-consistent-experience-across-devices",
+      "title": "Preserve the existing website look-and-feel while implementing the above changes; do not introduce a new theme. If any new UI elements are added (entry selection, new fields, online/offline controls), they must reuse the existing glass/gradient/animation patterns already present in the app for a consistent experience across devices.",
       "reqIds": [
         "REQ-8"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-helper-dashboard-to-list-available-help-requests-allow-accepting-tasks-allow-marking-submitting-completed-work-and-include-a-rating-system-where-students-can-rate-helpers-after-completion",
-      "title": "Implement the Helper Dashboard to list available help requests, allow accepting tasks, allow marking/submitting completed work, and include a rating system where students can rate helpers after completion.",
+      "id": "feature-provide-a-comprehensive-implementation-guide-design-specification-inside-the-repo-that-documents-roles-student-client-business-helper-admin-the-entry-selection-flow-all-form-fields-submission-mode-behavior-online-offline-moon-bake-notice-and-the-accept-reject-notification-behavior-including-exact-user-facing-message-copy",
+      "title": "Provide a comprehensive implementation guide/design specification inside the repo that documents: roles (Student/Client/Business/Helper/Admin), the entry-selection flow, all form fields, submission-mode behavior (Online/Offline + Moon Bake notice), and the accept/reject notification behavior (including exact user-facing message copy).",
       "reqIds": [
         "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-the-admin-dashboard-with-user-management-request-management-and-analytics-charts-using-backend-provided-aggregated-metrics",
-      "title": "Implement the Admin Dashboard with user management, request management, and analytics charts using backend-provided aggregated metrics.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-live-chat-messaging-between-students-and-helpers-for-a-request-task-using-polling-no-websockets-with-message-threads-stored-in-the-backend-include-basic-unread-notification-indicators-in-the-ui",
-      "title": "Implement live chat messaging between students and helpers for a request/task using polling (no WebSockets) with message threads stored in the backend; include basic unread/notification indicators in the UI.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-search-and-filtering-for-requests-including-location-based-filtering-for-offline-help-requests",
-      "title": "Add search and filtering for requests, including location-based filtering for offline help requests.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-seo-friendly-structure-for-the-spa-by-adding-appropriate-document-titles-meta-descriptions-where-feasible-and-semantic-markup-on-the-landing-page-and-key-public-routes",
-      "title": "Ensure SEO-friendly structure for the SPA by adding appropriate document titles, meta descriptions where feasible, and semantic markup on the landing page and key public routes.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-a-deployment-ready-build-for-the-internet-computer-project-with-clear-hosting-deployment-instructions-dfx-build-deploy-steps-environment-configuration-if-any-and-how-to-obtain-the-live-canister-urls-after-deployment",
-      "title": "Provide a deployment-ready build for the Internet Computer project with clear hosting/deployment instructions (dfx build/deploy steps, environment configuration if any) and how to obtain the live canister URLs after deployment.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enforce-the-no-file-upload-options-anywhere-requirement-across-the-entire-ui-and-backend-by-not-implementing-any-file-upload-inputs-endpoints",
-      "title": "Enforce the \"no file upload options anywhere\" requirement across the entire UI and backend by not implementing any file upload inputs/endpoints.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-and-include-a-small-set-of-custom-static-marketing-images-logo-landing-hero-illustration-and-render-them-in-the-frontend-as-static-assets-from-frontend-public-assets-generated-not-served-via-backend",
-      "title": "Generate and include a small set of custom static marketing images (logo + landing hero illustration) and render them in the frontend as static assets from frontend/public/assets/generated (not served via backend).",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-global-visual-design-system-to-a-premium-saas-style-using-glassmorphism-blurred-translucent-surfaces-smooth-blue-purple-cyan-gradients-softer-shadows-and-more-rounded-component-shapes-across-all-pages-while-keeping-all-user-facing-text-in-english",
-      "title": "Update the global visual design system to a premium SaaS style using glassmorphism (blurred translucent surfaces), smooth blue–purple–cyan gradients, softer shadows, and more-rounded component shapes across all pages while keeping all user-facing text in English.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-reusable-non-ui-folder-wrapper-components-utilities-for-the-premium-styling-e-g-glass-cards-containers-glass-inputs-and-glow-gradient-buttons-and-refactor-existing-pages-to-use-them-without-editing-any-files-under-frontend-src-components-ui",
-      "title": "Implement reusable non-UI-folder wrapper components/utilities for the premium styling (e.g., glass cards/containers, glass inputs, and glow/gradient buttons) and refactor existing pages to use them without editing any files under frontend/src/components/ui.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-upgrade-the-landing-page-to-a-full-screen-premium-hero-section-that-includes-1-animated-typing-headline-behavior-2-floating-animated-background-shapes-3-hover-glow-effects-on-buttons-and-4-scroll-reveal-animations-for-each-major-section-matching-the-new-blue-purple-cyan-theme",
-      "title": "Upgrade the Landing Page to a full-screen premium hero section that includes (1) animated typing headline behavior, (2) floating animated background shapes, (3) hover glow effects on buttons, and (4) scroll-reveal animations for each major section, matching the new blue–purple–cyan theme.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-modernize-all-authentication-and-request-forms-login-create-account-signup-student-request-help-freelancing-help-to-use-rounded-glass-style-inputs-with-focus-glow-premium-spacing-and-mobile-first-responsiveness-improvements",
-      "title": "Modernize all authentication and request forms (Login, Create Account/Signup, Student Request Help, Freelancing Help) to use rounded glass-style inputs with focus glow, premium spacing, and mobile-first responsiveness improvements.",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-upgrade-dashboards-student-helper-admin-with-a-modern-sidebar-navigation-that-includes-icons-provides-role-appropriate-navigation-links-and-remains-responsive-collapsible-drawer-behavior-on-mobile",
-      "title": "Upgrade dashboards (Student, Helper, Admin) with a modern sidebar navigation that includes icons, provides role-appropriate navigation links, and remains responsive (collapsible/drawer behavior on mobile).",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-animated-statistics-cards-and-gradient-section-headers-to-dashboard-pages-using-lightweight-animations-and-the-blue-purple-cyan-gradient-theme",
-      "title": "Add animated statistics cards and gradient section headers to dashboard pages, using lightweight animations and the blue–purple–cyan gradient theme.",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-smooth-transitions-between-pages-and-key-ui-state-changes-tabs-dialogs-section-reveals-while-keeping-animations-lightweight-and-respecting-reduced-motion-preferences",
-      "title": "Add smooth transitions between pages and key UI state changes (tabs, dialogs, section reveals) while keeping animations lightweight and respecting reduced-motion preferences.",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-micro-animations-across-the-ui-subtle-hover-scale-on-cards-improved-loading-animations-for-request-heavy-views-and-an-animated-success-confirmation-after-form-submission-e-g-requestsuccessbanner",
-      "title": "Implement micro-animations across the UI: subtle hover-scale on cards, improved loading animations for request-heavy views, and an animated success confirmation after form submission (e.g., RequestSuccessBanner).",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-performance-and-accessibility-quality-for-the-new-ui-animations-remain-smooth-on-mobile-layouts-are-responsive-at-common-breakpoints-and-dark-light-mode-maintains-accessible-contrast-include-a-premium-toggle-switch-control-in-the-header-for-theme-switching-with-a-smooth-theme-transition",
-      "title": "Ensure performance and accessibility quality for the new UI: animations remain smooth on mobile, layouts are responsive at common breakpoints, and dark/light mode maintains accessible contrast; include a premium toggle switch control in the header for theme switching with a smooth theme transition.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-collect-and-confirm-a-concrete-itemized-list-of-the-user-s-requested-changes-before-starting-implementation-including-a-which-page-s-screen-s-the-change-applies-to-b-the-exact-current-behavior-content-c-the-exact-desired-behavior-content-english-user-facing-text-and-d-how-to-verify-the-change-is-correct",
-      "title": "Collect and confirm a concrete, itemized list of the user’s requested changes before starting implementation, including (a) which page(s)/screen(s) the change applies to, (b) the exact current behavior/content, (c) the exact desired behavior/content (English user-facing text), and (d) how to verify the change is correct.",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enforce-that-only-users-with-the-admin-role-can-access-any-admin-section-ui-and-any-admin-only-backend-operations-all-non-admin-users-including-student-helper-and-business-roles-must-be-prevented-from-entering-the-admin-route-and-must-not-be-able-to-invoke-admin-only-backend-apis",
-      "title": "Enforce that only users with the Admin role can access any Admin section UI and any admin-only backend operations; all non-admin users (including student, helper, and business roles) must be prevented from entering the admin route and must not be able to invoke admin-only backend APIs.",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-help-request-submission-flow-so-that-users-can-successfully-submit-a-help-request-from-the-student-request-help-page-and-the-freelancing-help-page-without-getting-an-error-like-unable-to-send-message-ensure-the-backend-authorization-logic-matches-the-roles-allowed-to-access-these-pages-and-that-the-frontend-displays-a-successful-submission-state-when-the-backend-accepts-the-request",
-      "title": "Fix the help-request submission flow so that users can successfully submit a help request from the Student Request Help page and the Freelancing Help page without getting an error like “unable to send message”. Ensure the backend authorization logic matches the roles allowed to access these pages, and that the frontend displays a successful submission state when the backend accepts the request.",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-error-handling-for-failed-help-request-submissions-so-that-the-ui-no-longer-shows-misleading-messaging-e-g-unable-to-send-message-for-request-creation-failures-map-backend-errors-traps-from-request-creation-to-a-user-friendly-english-toast-message-on-both-help-request-pages",
-      "title": "Improve error handling for failed help-request submissions so that the UI no longer shows misleading messaging (e.g., “unable to send message”) for request creation failures. Map backend errors/traps from request creation to a user-friendly English toast message on both help-request pages.",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-clearly-separated-entry-points-areas-for-regular-users-vs-the-single-site-owner-admin-add-a-dedicated-owner-area-route-e-g-owner-or-dashboard-owner-that-is-only-accessible-to-the-admin-role-and-add-a-dedicated-user-work-request-route-e-g-work-request-that-is-accessible-to-authenticated-non-admin-users",
-      "title": "Create clearly separated entry points/areas for regular users vs the single site owner (admin): add a dedicated Owner area route (e.g., \"/owner\" or \"/dashboard/owner\") that is only accessible to the Admin role, and add a dedicated User Work Request route (e.g., \"/work-request\") that is accessible to authenticated non-admin users.",
-      "reqIds": [
-        "REQ-31"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-request-submission-permissions-so-that-authenticated-non-admin-users-can-submit-work-requests-without-being-blocked-by-the-current-only-students-and-businesses-can-create-requests-restriction-as-shown-in-the-provided-screenshot-ensure-the-backend-authorization-and-frontend-gating-messages-match-the-new-rule",
-      "title": "Update request-submission permissions so that authenticated non-admin users can submit work requests without being blocked by the current “Only students and businesses can create requests” restriction (as shown in the provided screenshot). Ensure the backend authorization and frontend gating messages match the new rule.",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-an-owner-inbox-inside-the-owner-admin-session-that-shows-all-submitted-work-requests-from-all-users-and-provides-a-per-request-detail-view-with-access-to-the-embedded-in-website-chat-thread-for-that-request",
-      "title": "Implement an Owner Inbox inside the Owner/Admin session that shows all submitted work requests (from all users) and provides a per-request detail view with access to the embedded in-website chat thread for that request.",
-      "reqIds": [
-        "REQ-33"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-send-a-telegram-notification-for-every-newly-submitted-work-request-to-the-telegram-channel-url-provided-by-the-user-https-t-me-techcrunchz-add-a-secure-configuration-mechanism-for-the-required-telegram-bot-credentials-e-g-bot-token-and-target-chat-channel-id-and-surface-a-clear-admin-only-ui-state-indicating-whether-telegram-notifications-are-configured-and-working",
-      "title": "Send a Telegram notification for every newly submitted work request to the Telegram channel URL provided by the user: https://t.me/techcrunchz . Add a secure configuration mechanism for the required Telegram bot credentials (e.g., bot token and target chat/channel id) and surface a clear admin-only UI state indicating whether Telegram notifications are configured and working.",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-make-the-admin-owner-dashboard-fully-customized-for-the-single-business-owner-by-redesigning-the-admin-dashboard-ia-and-copy-to-reflect-an-owner-console-owner-inbox-requests-users-analytics-while-keeping-admin-only-protections-intact",
-      "title": "Make the admin/owner dashboard “fully customized” for the single business owner by redesigning the Admin dashboard IA and copy to reflect an Owner Console (Owner Inbox, Requests, Users, Analytics), while keeping Admin-only protections intact.",
-      "reqIds": [
-        "REQ-36"
       ],
       "version": 1
     }
@@ -296,199 +85,48 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Landing page with modern UI, gradient theme, smooth/scroll animations, hover effects, and animated hero typing text",
+      "summary": "User authentication (login + create account) for platform access",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Dark mode / Light mode toggle across the site",
+      "summary": "Landing/entry selection screen with three user types: Student, Client, Business (with transition font styling)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Authentication system: login (email/password + role selection) and create account (name/age/email/password/country + role radio buttons)",
+      "summary": "Role-specific input forms capturing name, age, and title+description fields per user type",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Student Request Help page with required form fields, subject/topic as text description boxes, online/offline selection with conditional offline address fields, and submit (no file uploads)",
+      "summary": "Submit flow sends user details/requests to owner/admin for review and enables admin to initiate conversations with users",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Freelancing & Service Help page as a help request section (title + large description + submit), with category cards removed",
+      "summary": "Add submission mode options: Online vs Offline; if Offline, display meetup notification for Moon Bake, Kengeri Satellite Town, Bangalore 560060 (all user types)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Student dashboard: view submitted requests, statuses (Pending/Accepted/Completed), and chat with helper",
+      "summary": "Acceptance/rejection workflow with user notifications: confirmation on accept; rejection message encouraging retry",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-7",
-      "summary": "Helper dashboard: view available requests, accept tasks, submit completed work, and student rating system",
+      "summary": "Maintain existing website UI/design while implementing the upgraded feature changes",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Admin dashboard: manage users/requests and view analytics charts",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Backend API with secure authentication, password encryption, and role-based access control",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Database models for Users, Requests, Tasks, Ratings, and Messages",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Live chat messaging system between student and helper",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Notification alerts system",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Search and filter requests, including location-based filtering for offline help",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Rating and review system",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "SEO-friendly structure",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Deployment-ready build with hosting instructions and a live preview link",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-27",
-      "summary": "Implement backend data models and persistence for Users, Requests, Tasks, Ratings, and Messages, and expose a complete set of backend APIs needed by the frontend flows.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-28",
-      "summary": "Upgrade global UI to premium SaaS look: glassmorphism cards (blur), blue–purple–cyan gradient theme, soft shadows/rounded components, and modern professional fonts",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-29",
-      "summary": "Landing page premium animation pass: full-screen animated hero, headline typing animation, floating animated background shapes, button hover glow, and scroll-reveal section animations",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-30",
-      "summary": "Modernize forms (Login/Signup/Request Help): rounded glass inputs, focus-glow while typing, improved mobile spacing, and smooth button hover animations",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-31",
-      "summary": "Dashboard UI upgrade: modern icon sidebar navigation, animated statistics cards, gradient section headers, and smooth page-to-page transitions",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-32",
-      "summary": "Micro-animations + UX feedback: subtle hover-scale on cards, loading animations for requests, and success confirmation animation after form submission (keep lightweight/performance-friendly)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-33",
-      "summary": "Route-guard the Admin section so that only Admin (site owner) can access it; prevent all other users from entering admin pages.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-34",
-      "summary": "Owner inbox for all form submissions: when any student/client/business submits a request form, it appears directly to the site owner inside the website for review and reply (no email requirement).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-35",
-      "summary": "Add a site-owner chat section to interact with students/clients/businesses about their submitted requests (owner can reply from inside the site).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-36",
-      "summary": "Create separate, clearly distinguished pages/areas for regular users vs the site owner (owner-only entry point to Admin/management views)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-37",
-      "summary": "Telegram channel integration: send every user work-request submission to https://t.me/techcrunchz (in addition to storing/showing it in the site owner Admin inbox)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-38",
-      "summary": "Customize the Admin page/dashboard specifically for the single site owner (personalized owner-only management UI)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-39",
-      "summary": "Add an in-website chat session so the owner can chat with users about their work requests from inside the site (Admin session)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-43",
-      "summary": "Extend backend chat authorization so the Admin (site owner) can participate in chat threads for any request (send/read/mark-read), while preserving existing access for the request owner and assigned helper where applicable.",
-      "reqIds": [
-        "REQ-34"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-46",
-      "summary": "Enforce the “single owner” expectation: prevent creation/assignment of additional Admin users beyond the business owner, and ensure only the owner can access owner-only admin operations.",
-      "reqIds": [
-        "REQ-37"
-      ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "EduBridge – Global Student Help & Freelancing Platform",
+  "projectName": "Upgrade EduBridge roles, entry selection, request forms, offline meeting notice, and accept/reject notifications (preserve existing design)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

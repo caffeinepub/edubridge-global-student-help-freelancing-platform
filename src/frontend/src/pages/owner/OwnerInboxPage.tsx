@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { usePageTitle } from '../../seo/usePageTitle';
 import { useGetAllRequests } from '../../hooks/useAdmin';
 import FloatingShapes from '../../components/animation/FloatingShapes';
-import { ArrowLeft, MessageSquare, MapPin, Clock, User } from 'lucide-react';
-import { RequestStatus } from '../../backend';
+import { ArrowLeft, MessageSquare, MapPin, Clock, User, Globe } from 'lucide-react';
+import { RequestStatus, SubmissionMode } from '../../backend';
 
 export default function OwnerInboxPage() {
   usePageTitle('Owner Inbox');
@@ -20,15 +20,18 @@ export default function OwnerInboxPage() {
     : requests.filter(r => r.status === filter);
 
   const getStatusBadge = (status: RequestStatus) => {
-    const variants = {
-      [RequestStatus.pending]: 'default',
-      [RequestStatus.accepted]: 'secondary',
-      [RequestStatus.completed]: 'outline',
-    } as const;
+    const config = {
+      [RequestStatus.pending]: { variant: 'default' as const, label: 'Pending' },
+      [RequestStatus.accepted]: { variant: 'secondary' as const, label: 'Accepted' },
+      [RequestStatus.completed]: { variant: 'outline' as const, label: 'Completed' },
+      [RequestStatus.rejected]: { variant: 'destructive' as const, label: 'Rejected' },
+    };
+
+    const statusConfig = config[status] || { variant: 'default' as const, label: String(status) };
 
     return (
-      <Badge variant={variants[status]}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+      <Badge variant={statusConfig.variant}>
+        {statusConfig.label}
       </Badge>
     );
   };
@@ -50,40 +53,47 @@ export default function OwnerInboxPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-4xl font-bold text-gradient">Inbox</h1>
-            <p className="text-muted-foreground">View and manage all work requests</p>
+            <h1 className="text-4xl font-bold text-gradient">Owner Inbox</h1>
+            <p className="text-muted-foreground text-lg">Review and manage all work requests</p>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filter Tabs */}
         <Card className="glass-strong">
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-2">
               <Button
                 variant={filter === 'all' ? 'default' : 'outline'}
                 onClick={() => setFilter('all')}
-                size="sm"
+                className={filter === 'all' ? 'gradient-primary text-white' : ''}
               >
                 All ({requests.length})
               </Button>
               <Button
                 variant={filter === RequestStatus.pending ? 'default' : 'outline'}
                 onClick={() => setFilter(RequestStatus.pending)}
-                size="sm"
+                className={filter === RequestStatus.pending ? 'gradient-primary text-white' : ''}
               >
                 Pending ({requests.filter(r => r.status === RequestStatus.pending).length})
               </Button>
               <Button
                 variant={filter === RequestStatus.accepted ? 'default' : 'outline'}
                 onClick={() => setFilter(RequestStatus.accepted)}
-                size="sm"
+                className={filter === RequestStatus.accepted ? 'gradient-primary text-white' : ''}
               >
                 Accepted ({requests.filter(r => r.status === RequestStatus.accepted).length})
               </Button>
               <Button
+                variant={filter === RequestStatus.rejected ? 'default' : 'outline'}
+                onClick={() => setFilter(RequestStatus.rejected)}
+                className={filter === RequestStatus.rejected ? 'gradient-primary text-white' : ''}
+              >
+                Rejected ({requests.filter(r => r.status === RequestStatus.rejected).length})
+              </Button>
+              <Button
                 variant={filter === RequestStatus.completed ? 'default' : 'outline'}
                 onClick={() => setFilter(RequestStatus.completed)}
-                size="sm"
+                className={filter === RequestStatus.completed ? 'gradient-primary text-white' : ''}
               >
                 Completed ({requests.filter(r => r.status === RequestStatus.completed).length})
               </Button>
@@ -98,49 +108,73 @@ export default function OwnerInboxPage() {
           </div>
         ) : filteredRequests.length === 0 ? (
           <Card className="glass-strong">
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No requests found</p>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              No requests found
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredRequests.map((request) => (
-              <Card 
-                key={request.id.toString()} 
-                className="glass-strong hover:glow-primary transition-all cursor-pointer"
-                onClick={() => navigate({ to: `/owner/inbox/${request.id.toString()}` })}
+              <Card
+                key={request.id.toString()}
+                className="glass hover:glass-strong hover-lift cursor-pointer transition-all"
+                onClick={() => navigate({ to: '/owner/inbox/$requestId', params: { requestId: request.id.toString() } })}
               >
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-xl">{request.title}</CardTitle>
-                        {getStatusBadge(request.status)}
-                      </div>
-                      <CardDescription className="line-clamp-2">
-                        {request.description}
-                      </CardDescription>
+                      <CardTitle className="text-lg">{request.title}</CardTitle>
+                      <CardDescription className="mt-1 line-clamp-2">{request.description}</CardDescription>
                     </div>
-                    <MessageSquare className="h-5 w-5 text-primary flex-shrink-0" />
+                    {getStatusBadge(request.status)}
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{request.owner.toString().slice(0, 8)}...</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{new Date(Number(request.createdAt) / 1000000).toLocaleDateString()}</span>
-                    </div>
-                    {request.locationInfo && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        <span>{request.locationInfo.city}</span>
-                      </div>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span className="font-mono truncate">{request.owner.toString().slice(0, 20)}...</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {request.submissionMode === SubmissionMode.online ? (
+                      <>
+                        <Globe className="h-4 w-4 text-primary" />
+                        <span className="text-primary font-medium">Online</span>
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="h-4 w-4 text-accent" />
+                        <span className="text-accent font-medium">Offline</span>
+                      </>
                     )}
                   </div>
+                  {request.submissionMode === SubmissionMode.offline && request.submissionLocation && (
+                    <div className="text-xs text-muted-foreground bg-accent/10 p-2 rounded">
+                      <MapPin className="h-3 w-3 inline mr-1" />
+                      {request.submissionLocation}
+                    </div>
+                  )}
+                  {request.locationInfo && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span>{request.locationInfo.city}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{new Date(Number(request.createdAt) / 1000000).toLocaleDateString()}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate({ to: '/owner/inbox/$requestId', params: { requestId: request.id.toString() } });
+                    }}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    View & Chat
+                  </Button>
                 </CardContent>
               </Card>
             ))}
